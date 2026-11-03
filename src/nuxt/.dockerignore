@@ -1,0 +1,25 @@
+# Build-context för pappas Nuxt-image.
+#
+# Viktigt: hemligheter får aldrig hamna i imagen. src/nuxt/.env innehåller
+# NUXT_ADMIN_TOKEN och läses av servern som lokal fallback - den filen ska
+# inte kopieras in i byggsteget.
+.env
+.env.*
+!.env.example
+
+# Byggutfall - byggs om i imagen
+.output
+.nuxt
+.nitro
+.cache
+dist
+.data
+
+# Beroenden - installeras med npm ci i imagen
+node_modules
+
+# Loggar och lokala filer
+logs
+*.log
+.DS_Store
+.git

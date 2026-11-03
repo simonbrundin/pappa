@@ -118,6 +118,9 @@ Kubernetes Secret `pappa-admin`) och faller tillbaka på `src/nuxt/.env`.
 Utan token är skrivning avstängd (503) - läsning och rankning fungerar
 ändå. Se `src/nuxt/README.md` för detaljer.
 
+`src/nuxt/.dockerignore` hindrar att env-filen kopieras in i Docker-imagen.
+Token får aldrig finnas i en image.
+
 ```bash
 curl localhost:3000/api/profiles
 curl "localhost:3000/api/matches?profile=PROFIL-ID"

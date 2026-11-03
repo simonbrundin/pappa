@@ -27,28 +27,39 @@ export function parseEnvFile(path: string): Record<string, string> {
 }
 
 /**
- * Sökvägar som kontrolleras efter en lokal .env-fil.
+ * Sökvägar som kontrolleras efter en lokal env-fil.
  *
- * - cwd/.env              (npm run dev i src/nuxt, eller .output i src/nuxt)
- * - cwd/../.env           (src/.env)
- * - repo-roten            (när cwd är src/nuxt eller en byggkatalog)
+ * Sökningen börjar i arbetskatalogen och går uppåt, så att filen hittas
+ * oavsett om appen startas från repo-roten, från src/nuxt eller från en
+ * byggkatalog:
+ *
+ *   <katalog>/.env
+ *   <katalog>/src/nuxt/.env
+ *   <katalog>/src/neon/.env.local
  */
 export function localEnvPaths(): string[] {
-  const cwd = process.cwd()
-  return [
-    resolve(cwd, '.env'),
-    resolve(cwd, '../.env'),
-    resolve(cwd, '../../src/nuxt/.env'),
-    resolve(cwd, '../../../src/nuxt/.env'),
-  ]
+  const paths: string[] = []
+  let dir = process.cwd()
+
+  for (let depth = 0; depth < 6; depth += 1) {
+    paths.push(resolve(dir, '.env'))
+    paths.push(resolve(dir, 'src/nuxt/.env'))
+    paths.push(resolve(dir, 'src/neon/.env.local'))
+
+    const parent = resolve(dir, '..')
+    if (parent === dir) break
+    dir = parent
+  }
+
+  return paths
 }
 
 /**
- * Läs en nyckel ur den första lokala .env-filen som innehåller den.
+ * Läs en nyckel ur den första lokala env-filen som innehåller den.
  *
  * Används för hemligheter som ska fungera både i `npm run dev` och när
  * produktionsbygget körs direkt på maskinen. I containern finns ingen
- * .env - där kommer värdet från Kubernetes Secret i stället.
+ * env-fil - där kommer värdet från Kubernetes Secret i stället.
  */
 export function readLocalEnvValue(key: string): string {
   for (const path of localEnvPaths()) {

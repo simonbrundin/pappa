@@ -1,7 +1,5 @@
-import { existsSync } from 'node:fs'
-import { resolve } from 'node:path'
 import postgres from 'postgres'
-import { parseEnvFile } from './env'
+import { readLocalEnvValue } from './env'
 
 let client: ReturnType<typeof postgres> | null = null
 
@@ -14,15 +12,10 @@ function resolveDatabaseUrl(): string {
   const fromConfig = config.databaseUrl || process.env.DATABASE_URL
   if (fromConfig) return fromConfig
 
-  const candidates = [
-    resolve(process.cwd(), '../neon/.env.local'),
-    resolve(process.cwd(), '../../src/neon/.env.local'),
-  ]
-  for (const candidate of candidates) {
-    if (!existsSync(candidate)) continue
-    const env = parseEnvFile(candidate)
-    if (env.DATABASE_URL) return env.DATABASE_URL
-  }
+  // Samma sökvägar som admin-token använder: .env och src/neon/.env.local,
+  // letade uppifrån från arbetskatalogen.
+  const local = readLocalEnvValue('DATABASE_URL')
+  if (local) return local
 
   throw new Error(
     'DATABASE_URL saknas. Sätt NUXT_DATABASE_URL eller lägg in en .env i src/nuxt.',

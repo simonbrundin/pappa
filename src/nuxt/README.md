@@ -143,6 +143,29 @@ Det skapar/uppdaterar Secret `pappa-admin` med samma token som den lokala
 filen. Token matas in i gränssnittet (lagras i `sessionStorage`, inte
 `localStorage`) och skickas som `x-admin-token`.
 
+#### Var filen letas upp
+
+`server/utils/env.ts` söker efter env-filer **uppåt** från arbetskatalogen
+(max sex nivåer) och tittar på `.env`, `src/nuxt/.env` och
+`src/neon/.env.local`. Därför fungerar token och databasanslutning oavsett
+om appen startas från repo-roten, från `src/nuxt` eller från en byggkatalog.
+Från en katalog utanför repot hittas ingenting - då är skrivning avstängd
+(503), precis som i containern.
+
+#### Hemligheter får inte hamna i imagen
+
+`src/nuxt/.dockerignore` utesluter `.env`, `node_modules`, `.output` och
+`.nuxt` från byggkontexten. Utan den skulle `COPY . .` i Dockerfile kopiera
+admin-token in i byggsteget. Runtime-imagen innehåller bara `.output`, så
+token finns inte i den - men byggcachen på maskinen hade innehållit den.
+Kontrollera med:
+
+```bash
+docker build --target build -t pappa-buildtest src/nuxt
+docker run --rm --entrypoint sh pappa-buildtest -c 'test -f /app/.env && echo LÄCKA || echo ok'
+```
+
+
 ### API
 
 | Endpoint | Metod | Skydd | Beskrivning |
