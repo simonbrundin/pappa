@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto'
+import { resolveAdminToken, safeEqual } from '../../utils/admin'
 import { getDb } from '../../utils/db'
 
 interface DismissBody {
@@ -16,8 +16,7 @@ interface DismissBody {
  * Skrivning - kräver admin-token (NUXT_ADMIN_TOKEN).
  */
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const token = config.adminToken
+  const token = resolveAdminToken()
 
   if (!token) {
     throw createError({
@@ -57,11 +56,3 @@ export default defineEventHandler(async (event) => {
 
   return { ok: true, a_id: aId, b_id: bId }
 })
-
-/** Jämför två strängar utan att avslöja längdskillnaden i tiden. */
-function safeEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a)
-  const bufB = Buffer.from(b)
-  if (bufA.length !== bufB.length) return false
-  return timingSafeEqual(bufA, bufB)
-}

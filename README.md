@@ -100,6 +100,24 @@ profilens `weights` (jsonb) och justeras per uppdrag utan kodändring.
 Att spara en kravprofil kräver admin-token (`NUXT_ADMIN_TOKEN`) - samma token
 som dubblettsammanslagningen. Läsning och rankning kräver ingen token.
 
+## Admin-token
+
+Skrivning mot masterdatabasen (dubblettsammanslagning, kravprofiler) kräver
+en token. Den skapas och sprids med ett skript - aldrig för hand och aldrig
+i repot:
+
+```bash
+npm run admin:token init      # skapa token i src/nuxt/.env (gitignorad, 600)
+npm run admin:token show      # visa token - mata in i gränssnittet
+npm run admin:token apply <namespace>   # skapa Secret pappa-admin i klustret
+npm run admin:token status    # var token finns
+```
+
+Servern letar upp token i `NUXT_ADMIN_TOKEN` (processmiljön eller
+Kubernetes Secret `pappa-admin`) och faller tillbaka på `src/nuxt/.env`.
+Utan token är skrivning avstängd (503) - läsning och rankning fungerar
+ändå. Se `src/nuxt/README.md` för detaljer.
+
 ```bash
 curl localhost:3000/api/profiles
 curl "localhost:3000/api/matches?profile=PROFIL-ID"

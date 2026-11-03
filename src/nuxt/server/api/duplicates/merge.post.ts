@@ -1,4 +1,4 @@
-import { timingSafeEqual } from 'node:crypto'
+import { resolveAdminToken, safeEqual } from '../../utils/admin'
 import { getDb } from '../../utils/db'
 
 interface MergeBody {
@@ -25,8 +25,7 @@ interface MergeBody {
  *     frölistan inte skapar tillbaka dubbletten vid nästa import.
  */
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig()
-  const token = config.adminToken
+  const token = resolveAdminToken()
 
   if (!token) {
     throw createError({
@@ -108,11 +107,3 @@ export default defineEventHandler(async (event) => {
     ...(result?.summary ?? {}),
   }
 })
-
-/** Jämför två strängar utan att avslöja längdskillnaden i tiden. */
-function safeEqual(a: string, b: string): boolean {
-  const bufA = Buffer.from(a)
-  const bufB = Buffer.from(b)
-  if (bufA.length !== bufB.length) return false
-  return timingSafeEqual(bufA, bufB)
-}

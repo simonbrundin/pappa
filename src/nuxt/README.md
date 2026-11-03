@@ -122,16 +122,26 @@ Skrivning kräver **admin-token**. Sätt den i appens miljö:
 NUXT_ADMIN_TOKEN="$(openssl rand -hex 24)" npm run app:dev
 ```
 
+Enklare: skriptet skapar en token och sparar den i `src/nuxt/.env`
+(gitignorad, rättigheter `600`). Servern letar upp token där om den inte
+finns i processmiljön:
+
+```bash
+npm run admin:token init      # skapa token i src/nuxt/.env
+npm run admin:token show      # visa token (mata in i gränssnittet)
+npm run admin:token status    # var token finns
+```
+
 I klustret läses token från hemligheten `pappa-admin` (valfri - utan den är
 sammanslagning avstängd och appen svarar 503):
 
 ```bash
-kubectl -n pappa create secret generic pappa-admin \
-  --from-literal=NUXT_ADMIN_TOKEN="$(openssl rand -hex 24)"
+npm run admin:token apply <namespace>
 ```
 
-Token matas in i gränssnittet (lagras i `sessionStorage`, inte `localStorage`)
-och skickas som `x-admin-token`.
+Det skapar/uppdaterar Secret `pappa-admin` med samma token som den lokala
+filen. Token matas in i gränssnittet (lagras i `sessionStorage`, inte
+`localStorage`) och skickas som `x-admin-token`.
 
 ### API
 

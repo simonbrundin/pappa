@@ -16,6 +16,29 @@ kubectl -n repo-template create secret generic pappa-neon-db \
 
 Flux kan göra samma sak med en `ExternalSecret` mot en secret store.
 
+## Admin-token
+
+Skrivning mot masterdatabasen (dubblettsammanslagning, kravprofiler) kräver
+`NUXT_ADMIN_TOKEN`. Deploymenten läser den ur Secret `pappa-admin`
+(`optional: true` - appen startar även utan token, men skrivning är då
+avstängd).
+
+Token skapas **utanför** repot och sätts i klustret:
+
+```bash
+npm run admin:token init                     # genererar token i src/nuxt/.env (gitignorad)
+npm run admin:token apply repo-template      # skapar Secret pappa-admin
+```
+
+Token får aldrig committas. `src/nuxt/.env` är gitignorad och filen får
+begränsade rättigheter (`600`).
+
+I PR-miljön sätts token på samma sätt, i PR-ns:
+
+```bash
+npm run admin:token apply <pr-namespace>
+```
+
 ## Schema
 
 Appliceras utanifrån klustret:

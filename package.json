@@ -10,6 +10,7 @@
     "db:migrate": "bash db/migrate.sh",
     "db:import": "uv run --with \"psycopg[binary]\" --with pyyaml python db/import_from_yaml.py",
     "db:backup": "bash db/backup.sh",
+    "admin:token": "bash scripts/admin-token.sh",
     "app:dev": "npm --prefix src/nuxt run dev",
     "app:build": "npm --prefix src/nuxt run build",
     "app:typecheck": "npm --prefix src/nuxt run typecheck"
