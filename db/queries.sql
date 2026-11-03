@@ -129,7 +129,8 @@ group by 1 order by 2 desc;
 --     OBS: förslag, inte sanning. Släktingar i samma bolag hamnar här.
 select signal, name_a, name_b, round(similarity::numeric, 2) as namnlikhet,
        org_a, org_b, shared_competences
-from fn_duplicate_candidates(0.45)
+from fn_duplicate_candidates(0.45, false)
+where not weak
 order by score desc;
 
 -- 25. Sammanslagna dubbletter - vad har slagits ihop och när?
@@ -148,3 +149,60 @@ join person_merge m on m.dropped_external_id = p.external_id;
 select p.external_id, p.full_name
 from person p
 where not exists (select 1 from person_source ps where ps.person_id = p.id);
+
+-- ===========================================================================
+-- Uppdragsmatchning
+-- ===========================================================================
+
+-- 28. Rankad kandidatlista mot en kravprofil.
+--     Sätt PROFIL_ID till profilens id (se fråga 30).
+--     Poängen är alltid delpoäng + förklaring - läs alltid med.
+--     \set PROFIL_ID '...'
+select score, eligible, full_name, title, organization,
+       must_covered || '/' || must_total as must,
+       nice_covered || '/' || nice_total as nice,
+       experience_basis, experience_years, seniority, location
+from fn_match_candidates(:'PROFIL_ID'::uuid);
+
+-- 29. Förklaringen - vad poängen egentligen bygger på.
+--     Det här är raden som ska läsas innan någon kontaktas.
+select full_name, score, array_to_string(explanation, E'\n  - ') as forklaring
+from fn_match_candidates(:'PROFIL_ID'::uuid)
+where eligible
+order by score desc
+limit 20;
+
+-- 30. Vilka profiler finns? Kopiera id till fråga 28.
+select id, slug, title, client_name,
+       must_have::text, min_must_have, nice_to_have::text,
+       min_seniority, min_experience_years, required_location,
+       accepted_locations::text, required_languages::text,
+       weights
+from job_profile
+order by created_at;
+
+-- 31. Must-have-täckning: vem täcker vad? Används för att se om ett
+--     krav är för snävt - om ingen täcker mer än 1 av 3 är kravet för hårt.
+select m.tag,
+       count(distinct pc.person_id)::int as personer_med_taggen
+from job_profile jp
+cross join lateral unnest(jp.must_have) as m(tag)
+left join person_competence pc
+  on pc.competence_id = (select id from competence where tag = m.tag)
+group by m.tag
+order by personer_med_taggen desc;
+
+-- 32. Datakonfidens i urvalet: hur mycket av bilden är belagd?
+--     documented = daterad anställningshistorik, explicit = angivet,
+--     seniority = gissat ur rollnivå.
+select it_experience_basis, count(*)::int as personer,
+       count(*) filter (where fn_documented_experience(id) > 0)::int as med_daterad_historik
+from person
+group by 1
+order by 2 desc;
+
+-- 33. Hur påverkas poängen av vikterna? Kör om fråga 28 med en annan
+--     viktfördelning genom att ändra weights i profilen:
+--     update job_profile set weights = '{"must_have":60, ...}'::jsonb where id = ...;
+--     Jämför ordningen mot fråga 28 - en stor poängskillnad utan
+--     skillnad i täckning betyder att vikten styr listan, inte matchningen.

@@ -77,3 +77,18 @@ Sammanslagning kräver admin-token (`NUXT_ADMIN_TOKEN`) och registreras i
 `person_merge`, så att nästa YAML-import inte skapar tillbaka den raderade
 posten. Se `db/README.md` för matchningsregeln i detalj och
 `db/test_merge.sql` för testerna.
+
+## Uppdragsmatchning
+
+`fn_match_candidates()` rankar kandidaterna mot en kravprofil i
+`job_profile`. Poängen är alltid delpoäng + förklaring, så att beslutet kan
+motiveras:
+
+```sql
+select score, full_name, organization, array_to_string(explanation, E'\n  - ')
+from fn_match_candidates('PROFIL-ID'::uuid)
+where eligible;
+```
+
+Vikterna ligger i profilens `weights` (jsonb) och justeras per uppdrag utan
+kodändring. Se `db/README.md` (avsnitt 10) och `db/test_match.sql`.

@@ -1063,6 +1063,415 @@ create trigger t_org_touch before update on organization
   for each row execute function fn_touch_updated_at();
 
 -- ---------------------------------------------------------------------------
+-- Uppdragsmatchning: rangordna kandidater mot en kravprofil
+--
+--   fn_match_candidates(p_profile uuid)
+--
+-- Två designprinciper:
+--   1. Poängen är alltid DELPOÄNG. Varje del redovisas separat, så att
+--      beslutet kan förklaras och ifrågasättas.
+--   2. En gissad uppgift väger mindre än en belagd. Erfarenhet som bygger på
+--      rollnivå ("seniority") räknas som uppskattad och syns som det.
+-- ---------------------------------------------------------------------------
+
+-- Kravprofil för ett uppdrag. Vikterna ligger i weights (jsonb) så att de
+-- kan justeras per uppdrag utan kodändring.
+create table if not exists job_profile (
+  id                 uuid primary key default gen_random_uuid(),
+  slug               text unique,                    -- idempotent nyckel för seed
+  title              text        not null,
+  client_name        text,
+  notes              text,
+  must_have          text[]      not null default '{}',   -- kompetenstaggar
+  min_must_have      integer,                              -- hur många som minst krävs
+  nice_to_have       text[]      not null default '{}',
+  min_seniority      text check (min_seniority in
+                       ('cxo','chef','lead','senior','mid','junior')),
+  min_experience_years integer,
+  required_location  text,
+  accepted_locations text[]      not null default '{}',   -- t.ex. pendelorter
+  required_languages text[]      not null default '{}',
+  available_by       date,                               -- senast tillgänglig
+  weights            jsonb       not null default '{}'::jsonb,
+  created_at         timestamptz not null default now(),
+  updated_at         timestamptz not null default now()
+);
+
+comment on table job_profile is
+  'Kravprofil per uppdrag. must_have/nice_to_have är taggar ur kompetenstaxonomin. min_must_have: hur många must-have som minst krävs (null = alla). weights: must_have, nice_to_have, experience, seniority, location, language, availability, confidence.';
+
+-- ---------------------------------------------------------------------------
+-- Matchningsfunktionen
+-- ---------------------------------------------------------------------------
+create or replace function fn_match_candidates(p_profile uuid)
+returns table (
+  person_id          uuid,
+  full_name          text,
+  title              text,
+  organization       text,
+  score              numeric,   -- 0-100, viktat
+  eligible           boolean,   -- false om en must-have saknas
+  must_score         numeric,
+  nice_score         numeric,
+  experience_score   numeric,
+  seniority_score    numeric,
+  location_score     numeric,
+  language_score     numeric,
+  availability_score numeric,
+  confidence_score   numeric,
+  documented_months  integer,
+  experience_years   integer,
+  experience_basis   text,
+  seniority          text,
+  location           text,
+  must_covered       integer,
+  must_total         integer,
+  must_missing       text[],
+  nice_covered       integer,
+  nice_total         integer,
+  explanation        text[]
+)
+language sql
+stable
+as $$
+with prof as (
+  select jp.*,
+         coalesce((jp.weights->>'must_have')::numeric, 40)       as w_must,
+         coalesce((jp.weights->>'nice_to_have')::numeric, 10)     as w_nice,
+         coalesce((jp.weights->>'experience')::numeric, 15)       as w_exp,
+         coalesce((jp.weights->>'seniority')::numeric, 10)        as w_sen,
+         coalesce((jp.weights->>'location')::numeric, 10)         as w_loc,
+         coalesce((jp.weights->>'language')::numeric, 5)          as w_lang,
+         coalesce((jp.weights->>'availability')::numeric, 5)      as w_avail,
+         coalesce((jp.weights->>'confidence')::numeric, 5)        as w_conf,
+         coalesce(cardinality(jp.must_have), 0) > 0             as has_must,
+         coalesce(jp.min_must_have, cardinality(jp.must_have)) as must_target,
+         coalesce(cardinality(jp.nice_to_have), 0) > 0          as has_nice,
+         coalesce(cardinality(jp.required_languages), 0) > 0    as has_lang,
+         jp.min_experience_years is not null                    as has_exp,
+         jp.min_seniority is not null                           as has_sen,
+         (jp.required_location is not null
+            or coalesce(cardinality(jp.accepted_locations), 0) > 0) as has_loc,
+         jp.available_by is not null                            as has_avail,
+         -- En profil utan krav är ett misstag, inte en matchning.
+         (coalesce(cardinality(jp.must_have), 0) > 0
+          or coalesce(cardinality(jp.nice_to_have), 0) > 0
+          or jp.min_experience_years is not null
+          or jp.min_seniority is not null
+          or jp.required_location is not null
+          or coalesce(cardinality(jp.accepted_locations), 0) > 0
+          or coalesce(cardinality(jp.required_languages), 0) > 0
+          or jp.available_by is not null)                     as has_criteria
+    from job_profile jp
+   where jp.id = p_profile
+),
+levels as (
+  select * from (values
+    ('junior', 1), ('mid', 2), ('senior', 3), ('lead', 4), ('cxo', 5), ('chef', 5)
+  ) as t(lvl, n)
+),
+persons as (
+  select p.id,
+         p.full_name,
+         p.title,
+         o.name as organization,
+         p.location,
+         p.seniority,
+         p.it_experience_years,
+         p.it_experience_basis,
+         p.data_confidence,
+         p.spoken_languages,
+         p.available_from,
+         fn_documented_experience(p.id) as documented_months,
+         -- livslångsaggregatet
+         coalesce((select array_agg(distinct c.tag)
+                     from person_competence pc
+                     join competence c on c.id = pc.competence_id
+                    where pc.person_id = p.id), '{}') as life_tags,
+         -- teknik under specifika anställningar
+         coalesce((select array_agg(distinct c.tag)
+                     from employment_competence ec
+                     join competence c on c.id = ec.competence_id
+                     join person_employment e on e.id = ec.employment_id
+                    where e.person_id = p.id), '{}') as job_tags
+    from person p
+    left join organization o on o.id = p.organization_id
+),
+must_hits as (
+  select ps.id,
+         count(*) filter (where ps.life_tags @> array[m.tag]
+                            or ps.job_tags @> array[m.tag])::int as covered,
+         array_agg(m.tag) filter (where ps.life_tags @> array[m.tag] is not true
+                            and ps.job_tags @> array[m.tag] is not true) as missing
+    from persons ps
+    cross join prof pr
+    cross join lateral unnest(pr.must_have) as m(tag)
+   group by ps.id
+),
+nice_hits as (
+  select ps.id,
+         count(*) filter (where ps.life_tags @> array[n.tag]
+                            or ps.job_tags @> array[n.tag])::int as covered
+    from persons ps
+    cross join prof pr
+    cross join lateral unnest(pr.nice_to_have) as n(tag)
+   group by ps.id
+),
+scored as (
+  select ps.id,
+         ps.full_name,
+         ps.title,
+         ps.organization,
+         ps.location,
+         ps.seniority,
+         ps.it_experience_years,
+         ps.it_experience_basis,
+         ps.documented_months,
+         ps.spoken_languages,
+         ps.available_from,
+         ps.data_confidence,
+         pr.has_must, pr.must_target, pr.has_nice, pr.has_exp, pr.has_sen,
+         pr.has_loc, pr.has_lang, pr.has_avail,
+         pr.must_have, pr.nice_to_have, pr.required_languages,
+         pr.min_experience_years, pr.min_seniority,
+         pr.required_location, pr.accepted_locations, pr.available_by,
+         pr.w_must, pr.w_nice, pr.w_exp, pr.w_sen, pr.w_loc,
+         pr.w_lang, pr.w_avail, pr.w_conf,
+         coalesce(mh.covered, 0) as must_covered,
+         coalesce(mh.missing, '{}') as must_missing,
+         coalesce(nh.covered, 0) as nice_covered,
+         -- erfarenhet: dokumenterad om den finns, annars uppskattad
+         case when ps.documented_months > 0 then ps.documented_months / 12.0
+              else ps.it_experience_years end::numeric as years_used,
+         case when ps.documented_months > 0 then 'documented'
+              else coalesce(ps.it_experience_basis, 'unknown') end as basis_used,
+         -- senioritetsnivå
+         coalesce((select l.n from levels l where l.lvl = ps.seniority), 0) as sen_level,
+         coalesce((select l.n from levels l where l.lvl = pr.min_seniority), 0) as req_level
+    from persons ps
+    cross join prof pr
+    left join must_hits mh on mh.id = ps.id
+    left join nice_hits nh on nh.id = ps.id
+   where pr.has_criteria
+),
+points as (
+  select s.*,
+    -- must-have: andel täckta taggar
+    case when s.has_must
+         then round(100.0 * s.must_covered / greatest(cardinality(s.must_have), 1), 1)
+         else null end as must_points,
+    case when s.has_nice
+         then round(100.0 * s.nice_covered / greatest(cardinality(s.nice_to_have), 1), 1)
+         else null end as nice_points,
+    -- erfarenhet: minsta år mot kravet
+    case when s.has_exp
+         then round(least(100.0,
+              100.0 * coalesce(s.years_used, 0)
+                    / greatest(s.min_experience_years, 1)), 1)
+         else null end as exp_points,
+    -- senioritet: under kravet kostar 25 poäng per nivå, överkvalificering straffas inte
+    case when s.has_sen
+         then round(greatest(0, 100 - 25 * greatest(s.req_level - s.sen_level, 0)), 1)
+         else null end as sen_points,
+    -- ort: kravort 100, pendelort 70, okänd ort 40, annan ort 0
+    case when s.has_loc
+         then case
+                when s.location is not null and s.location = s.required_location then 100
+                when s.location is not null and s.location = any(s.accepted_locations) then 70
+                when s.location is null or s.location = ''
+                     or s.location ilike 'okänd%' then 40
+                else 0
+              end
+         else null end as loc_points,
+    -- språk: ingen data ger neutrala 50, aldrig 0
+    case when s.has_lang
+         then case
+                when s.spoken_languages is null
+                  or cardinality(s.spoken_languages) = 0 then 50
+                else round(100.0 * (
+                       select count(*) from unnest(s.required_languages) l
+                        where l = any(s.spoken_languages)
+                     )::numeric / greatest(cardinality(s.required_languages), 1), 1)
+              end
+         else null end as lang_points,
+    -- tillgänglighet: ingen data ger neutrala 50
+    case when s.has_avail
+         then case
+                when s.available_from is null then 50
+                when s.available_from <= s.available_by then 100
+                else 0
+              end
+         else null end as avail_points,
+    -- datakonfidens: hur mycket av bilden som är belagd
+    round(100.0 * (
+        0.6 * case s.data_confidence
+                when 'high' then 1.0 when 'medium' then 0.7
+                when 'low' then 0.4 else 0.3 end
+      + 0.4 * case when s.documented_months > 0 then 1.0
+                   when s.it_experience_basis = 'explicit' then 0.8
+                   when s.it_experience_basis = 'notes' then 0.65
+                   when s.it_experience_basis = 'seniority' then 0.4
+                   else 0.25 end
+    ), 1) as conf_points
+  from scored s
+),
+totalled as (
+  select p.*,
+    (case when p.has_must  then p.w_must  else 0 end)
+  + (case when p.has_nice  then p.w_nice  else 0 end)
+  + (case when p.has_exp   then p.w_exp   else 0 end)
+  + (case when p.has_sen   then p.w_sen   else 0 end)
+  + (case when p.has_loc   then p.w_loc   else 0 end)
+  + (case when p.has_lang  then p.w_lang  else 0 end)
+  + (case when p.has_avail then p.w_avail else 0 end)
+  + p.w_conf as active_weight,
+    (case when p.has_must  then p.w_must  * p.must_points  else 0 end)
+  + (case when p.has_nice  then p.w_nice  * p.nice_points  else 0 end)
+  + (case when p.has_exp   then p.w_exp   * p.exp_points   else 0 end)
+  + (case when p.has_sen   then p.w_sen   * p.sen_points   else 0 end)
+  + (case when p.has_loc   then p.w_loc   * p.loc_points   else 0 end)
+  + (case when p.has_lang  then p.w_lang  * p.lang_points  else 0 end)
+  + (case when p.has_avail then p.w_avail * p.avail_points else 0 end)
+  + p.w_conf * p.conf_points as weighted_sum
+  from points p
+)
+select
+  t.id as person_id,
+  t.full_name,
+  t.title,
+  t.organization,
+  case when t.active_weight = 0 then null
+       else round(t.weighted_sum / t.active_weight, 1) end as score,
+  (not t.has_must or t.must_covered >= t.must_target) as eligible,
+  t.must_points as must_score,
+  t.nice_points as nice_score,
+  t.exp_points as experience_score,
+  t.sen_points as seniority_score,
+  t.loc_points as location_score,
+  t.lang_points as language_score,
+  t.avail_points as availability_score,
+  t.conf_points as confidence_score,
+  t.documented_months,
+  t.it_experience_years as experience_years,
+  t.basis_used as experience_basis,
+  t.seniority,
+  t.location,
+  t.must_covered,
+  cardinality(t.must_have) as must_total,
+  t.must_missing,
+  t.nice_covered,
+  cardinality(t.nice_to_have) as nice_total,
+  array_remove(array[
+    case when t.has_must
+         then format('%s av %s must-have täcker%s%s',
+              t.must_covered, cardinality(t.must_have),
+              case when t.must_target < cardinality(t.must_have)
+                   then format(' (minst %s krävs)', t.must_target) else '' end,
+              case when t.must_covered < t.must_target
+                   then ' - saknar: ' || array_to_string(t.must_missing, ', ')
+                   else '' end)
+    end,
+    case when t.has_nice
+         then format('%s av %s nice-to-have täcker',
+              t.nice_covered, cardinality(t.nice_to_have))
+    end,
+    case when t.has_exp
+         then case when t.documented_months > 0
+                   then format('dokumenterad erfarenhet %s år (krav %s år)%s',
+                        round(t.documented_months / 12.0, 1), t.min_experience_years,
+                        case when t.it_experience_years is not null
+                             and t.it_experience_years <> round(t.documented_months / 12.0)
+                             then format(' - angivet totalt %s år',
+                                  t.it_experience_years)
+                             else '' end)
+                   when t.years_used is null
+                   then 'erfarenhet okänd (krav ' || t.min_experience_years || ' år)'
+                   else format('%s (krav %s år)',
+                        case t.basis_used
+                          when 'explicit' then 'angiven erfarenhet ' || round(t.years_used, 1) || ' år'
+                          when 'notes'    then 'erfarenhet utläst ur anteckningar ' || round(t.years_used, 1) || ' år'
+                          when 'seniority' then 'uppskattad erfarenhet ' || round(t.years_used, 1) || ' år (grund: rollnivå)'
+                          else 'erfarenhet okänd'
+                        end,
+                        t.min_experience_years)
+              end
+    end,
+    case when t.has_sen
+         then format('senioritet %s (krav %s)', t.seniority, t.min_seniority)
+    end,
+    case when t.has_loc
+         then case when t.location is null or t.location = ''
+                        or t.location ilike 'okänd%'
+                   then 'ort okänd (krav ' || coalesce(t.required_location, 'ingen') || ')'
+                   else format('ort %s', t.location) end
+    end,
+    case when t.has_lang
+         then case when t.spoken_languages is null
+                        or cardinality(t.spoken_languages) = 0
+                   then 'språk: ingen data'
+                   else format('språk: %s', array_to_string(t.spoken_languages, ', '))
+              end
+    end,
+    case when t.has_avail
+         then case when t.available_from is null then 'tillgänglighet: ingen data'
+                   else format('tillgänglig från %s', t.available_from) end
+    end,
+    format('datakonfidens %s', t.data_confidence),
+    case when t.documented_months = 0 and t.it_experience_basis = 'seniority'
+         then 'erfarenheten bygger på rollnivå, inte på dokumenterad historik'
+    end
+  ], null) as explanation
+from totalled t
+-- Sortering: först hur väl kravet täcks (must-have, sedan nice-to-have),
+-- sedan poängen. Poängen ensam diskriminerar dåligt - de flesta kandidater
+-- har ort rätt och senioritet över krav, så poängen hamnar ihop.
+order by (not t.has_must or t.must_covered >= t.must_target) desc,
+         t.must_covered desc,
+         t.nice_covered desc,
+         (case when t.active_weight = 0 then null
+               else t.weighted_sum / t.active_weight end) desc nulls last,
+         t.full_name;
+$$;
+
+
+-- ---------------------------------------------------------------------------
+-- Exempelprofil - vad en kravprofil ser ut i praktiken
+--
+-- Notera: must_have bör normalt vara EN tagg. Den här databasen har
+-- sällsynta taggar, och "system_development + information_security + cloud"
+-- som krav gör nästan alla kandideter underkända (max täckning var 1 av 3).
+-- Vill man kräva flera taggar används min_must_have, t.ex. "minst 2 av 3".
+-- ---------------------------------------------------------------------------
+insert into job_profile
+  (slug, title, client_name, notes, must_have, min_must_have, nice_to_have,
+   min_seniority, min_experience_years, required_location, accepted_locations,
+   required_languages, weights)
+values
+  ('exempel-systemutvecklare',
+   'Senior systemutvecklare med säkerhetsansvar',
+   'Exempelkund i Sundsvall',
+   'Exempelprofil för att prova vikterna. Vikterna justeras i weights (jsonb) - ingen kodändring behövs.',
+   array['system_development'], 1,
+   array['cloud','information_security','it_leadership'],
+   'senior', 8, 'Sundsvall',
+   array['Örnsköldsvik'],
+   array['svenska','engelska'],
+   '{"must_have":40,"nice_to_have":10,"experience":15,"seniority":10,"location":10,"language":5,"availability":5,"confidence":5}'::jsonb)
+on conflict (slug) do update
+  set title = excluded.title,
+      notes = excluded.notes,
+      must_have = excluded.must_have,
+      min_must_have = excluded.min_must_have,
+      nice_to_have = excluded.nice_to_have,
+      min_seniority = excluded.min_seniority,
+      min_experience_years = excluded.min_experience_years,
+      required_location = excluded.required_location,
+      accepted_locations = excluded.accepted_locations,
+      required_languages = excluded.required_languages,
+      weights = excluded.weights,
+      updated_at = now();
+
+-- ---------------------------------------------------------------------------
 -- Kommentarar
 -- ---------------------------------------------------------------------------
 comment on table  person is 'Kandidater. Endast personer med källa (person_source) bör finnas här.';
@@ -1086,4 +1495,5 @@ comment on function fn_name_match is 'Jämför förnamn och efternamn var för s
 comment on table duplicate_dismissal is 'Par som markerats som "behåll båda" - utesluts ur kandidatlistan.';
 comment on function fn_merge_people is 'Slår ihop två poster om samma person. Flyttar kopplingar, fyller luckor och registrerar den raderade postens external_id i person_merge.';
 comment on table person_merge is 'Logg över sammanslagna dubbletter. Importer hoppar över external_id som finns här.';
+comment on function fn_match_candidates is 'Rankar kandidater mot en kravprofil. Returnerar viktad poäng 0-100, delpoäng per del, matchade/missade must-have och en förklaring per person.';
 comment on function fn_purge_expired_personal_data is 'Gallrar personer vars retention_until passerat. Kör via pg_cron eller manuellt.';

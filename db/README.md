@@ -16,6 +16,7 @@ riktig Postgres 16-container.
 | `restore.sh` | Återställer från backup (verifierar efteråt) |
 | `queries.sql` | Driftfrågor: dubblettkoll, export, gallring |
 | `test_merge.sql` | Test av dubblettsammanslagning (transaktion som rullas tillbaka) |
+| `test_match.sql` | Test av uppdragsmatchningen (transaktion som rullas tillbaka) |
 | `docker-compose.yml` | Lokal dev-databas (+ valfritt PgAdmin) |
 
 Neon-lagret (policy, env-variabler, anslutning) ligger i `src/neon/`.
@@ -375,5 +376,80 @@ Regler för filen:
 Filtret "minst 3 år i IT" bygger på `it_experience_years`. Utan dokumenterad
 historia är 124 av 140 värden gissade ur rollnivån. Med historik kan fler bli
 `documented` - och då är filtret en uppgift i stället för en gissning.
+## 10. Uppdragsmatchning - rangordning av kandidater
 
+`fn_match_candidates(p_profile uuid)` rankar kandidaterna mot en kravprofil
+(`job_profile`). Poängen är alltid **delpoäng + förklaring**: beslutet ska
+kunna förklaras och ifrågasättas, inte bara summeras.
 
+### Kravprofilen
+
+| Fält | Betydelse |
+| --- | --- |
+| `must_have` | Kompetenstaggar som krävs |
+| `min_must_have` | Hur många av `must_have` som minst krävs (null = alla) |
+| `nice_to_have` | Taggar som är meriterande |
+| `min_seniority` | Lägsta rollnivå |
+| `min_experience_years` | Lägsta antal år i IT |
+| `required_location` / `accepted_locations` | Kravort och pendelorter |
+| `required_languages` | Kravspråk |
+| `available_by` | Senaste datum personen ska vara tillgänglig |
+| `weights` | Vikter per del (jsonb) - justeras per uppdrag, ingen kodändring |
+
+Kompetenser matchas mot både livslångsaggregatet (`person_competence`) och
+tekniken under specifika anställningar (`employment_competence`).
+
+### Delpoäng (0-100 per del, viktas till en total)
+
+| Del | Vikt | Hur den räknas |
+| --- | --- | --- |
+| Must-have | 40 | Andel täckta taggar |
+| Nice-to-have | 10 | Andel täckta taggar |
+| Erfarenhet | 15 | Dokumenterad tid om den finns, annars angivet värde - mot kravet |
+| Senioritet | 10 | 25 poäng per nivå under kravet; överkvalificering straffas inte |
+| Ort | 10 | Kravort 100, pendelort 70, okänd ort 40, annan ort 0 |
+| Språk | 5 | Täckta kravspråk; **ingen data ger neutrala 50**, aldrig 0 |
+| Tillgänglighet | 5 | `available_from` före `available_by`; ingen data ger 50 |
+| Datakonfidens | 5 | 60 % källdäckning + 40 % grund för erfarenhetsvärdet |
+
+Delar som profilen inte styr är **inaktiva** och ingår inte i viktsumman -
+en profil utan språkkrav straffar inte folk för saknad språkdata.
+
+### Diskvalifiering
+
+En kandidat är `eligible` om `must_covered >= min_must_have`. Saknas en
+must-have hamnar kandidaten **under** de godkända i listan, med en förklaring
+som säger vad som saknas. Den utesluts inte - en människa ska kunna se och
+överskrida.
+
+### Två lärdomar från mätning på den riktiga databasen
+
+1. **Must-have ska normalt vara EN tagg.** "system_development +
+   information_security + cloud" som krav gav högst 1 av 3 täckt - ingen
+   kandidat blev godkänd. Vill man kräva flera taggar används
+   `min_must_have`, t.ex. "minst 2 av 3".
+2. **Poängen ensam diskriminerar dåligt.** Nästan alla kandidater har ort
+   rätt och senioritet över krav, så poängen hamnade ihop (94 mot 88).
+   Listan sorteras därför först på hur väl kravet täcks och sedan på
+   poängen - se `order by` i funktionen.
+
+### Användning
+
+```sql
+-- lista profiler
+select id, slug, title, must_have, min_must_have from job_profile;
+
+-- rankad lista med förklaring
+select score, full_name, organization, array_to_string(explanation, E'\n  - ')
+from fn_match_candidates('PROFIL-ID'::uuid)
+where eligible;
+```
+
+Driftfrågorna 28-33 i `queries.sql` har färdiga varianter. Testet:
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/test_match.sql
+```
+
+Exempelprofilen `exempel-systemutvecklare` skapas av `schema.sql` (idempotent
+på `slug`) och används för att prova vikterna.
