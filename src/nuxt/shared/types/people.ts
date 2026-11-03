@@ -128,3 +128,68 @@ export interface DuplicatesResponse {
   count: number
   weakCount: number
 }
+
+/** Kravprofil för ett uppdrag. Vikterna styr hur delpoängen vägs samman. */
+export interface JobProfile {
+  id: string
+  slug: string | null
+  title: string
+  client_name: string | null
+  notes: string | null
+  must_have: string[]
+  /** Hur många must-have som minst krävs. Null = alla. */
+  min_must_have: number | null
+  nice_to_have: string[]
+  min_seniority: string | null
+  min_experience_years: number | null
+  required_location: string | null
+  accepted_locations: string[]
+  required_languages: string[]
+  available_by: string | null
+  weights: Record<string, number>
+}
+
+export interface ProfilesResponse {
+  profiles: JobProfile[]
+}
+
+/**
+ * En rangordnad kandidat. Poängen är alltid delpoäng + förklaring -
+ * beslutet ska kunna motiveras och ifrågasättas.
+ */
+export interface MatchCandidate {
+  person_id: string
+  full_name: string
+  title: string | null
+  organization: string | null
+  /** Viktad poäng 0-100. */
+  score: number | null
+  /** False om kandidaten inte täcker must-have-kravet. */
+  eligible: boolean
+  must_score: number | null
+  nice_score: number | null
+  experience_score: number | null
+  seniority_score: number | null
+  location_score: number | null
+  language_score: number | null
+  availability_score: number | null
+  confidence_score: number | null
+  documented_months: number
+  experience_years: number | null
+  /** documented | explicit | notes | seniority | unknown */
+  experience_basis: string
+  seniority: string | null
+  location: string | null
+  must_covered: number
+  must_total: number
+  must_missing: string[]
+  nice_covered: number
+  nice_total: number
+  explanation: string[]
+}
+
+export interface MatchesResponse {
+  profile: JobProfile
+  candidates: MatchCandidate[]
+  eligibleCount: number
+}

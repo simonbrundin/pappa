@@ -14,22 +14,19 @@ const { data, status, error, refresh } = useFetch<DuplicatesResponse>('/api/dupl
  * Admin-token. Lagras i sessionStorage (aldrig i localStorage) och skickas
  * som header. Utan token går det att läsa kandidaterna, men inte att
  * slå ihop - skrivning mot masterdatabasen ska aldrig vara publik.
+ *
+ * Delas med vyn "Uppdrag" via useAdminToken, så token sätts en gång.
  */
-const token = ref('')
-const tokenInput = ref('')
+const { token, input: tokenInput, load: loadToken, save: saveTokenRaw, headers } = useAdminToken()
 const busy = ref<string | null>(null)
 const message = ref<{ tone: 'ok' | 'error'; text: string } | null>(null)
 /** Visa de svaga paren (gemensamt förnamn/efternamn). */
 const showWeak = ref(false)
 
-onMounted(() => {
-  token.value = sessionStorage.getItem('pappa-admin-token') ?? ''
-  tokenInput.value = token.value
-})
+onMounted(loadToken)
 
 function saveToken() {
-  token.value = tokenInput.value.trim()
-  sessionStorage.setItem('pappa-admin-token', token.value)
+  saveTokenRaw(tokenInput.value)
   message.value = token.value
     ? { tone: 'ok', text: 'Token sparad för den här webbläsarsessionen.' }
     : { tone: 'error', text: 'Tomt token - sammanslagning är avstängd.' }
@@ -75,7 +72,7 @@ async function merge(candidate: DuplicateCandidate, keep: 'a' | 'b') {
   try {
     const result = await $fetch<Record<string, unknown>>('/api/duplicates/merge', {
       method: 'POST',
-      headers: token.value ? { 'x-admin-token': token.value } : {},
+      headers: headers(),
       body: { a_id: candidate.id_a, b_id: candidate.id_b, keep },
     })
     message.value = {
@@ -109,7 +106,7 @@ async function keepBoth(candidate: DuplicateCandidate) {
   try {
     await $fetch('/api/duplicates/dismiss', {
       method: 'POST',
-      headers: token.value ? { 'x-admin-token': token.value } : {},
+      headers: headers(),
       body: { a_id: candidate.id_a, b_id: candidate.id_b },
     })
     message.value = { tone: 'ok', text: `Markerat som olika personer: ${nameA} och ${nameB}.` }

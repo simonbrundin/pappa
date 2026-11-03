@@ -140,6 +140,28 @@ och skickas som `x-admin-token`.
 | `/api/duplicates` | GET | - | Dubblettkandidater: `candidates` (starka) och `weak` (svaga) |
 | `/api/duplicates/merge` | POST | `x-admin-token` | Slår ihop ett par (`a_id`, `b_id`, valfritt `keep`: `a`/`b`) |
 | `/api/duplicates/dismiss` | POST | `x-admin-token` | Markerar ett par som "behåll båda" (`a_id`, `b_id`) |
+| `/api/profiles` | GET | - | Kravprofiler för uppdrag |
+| `/api/profiles` | POST | `x-admin-token` | Skapa eller uppdatera en kravprofil |
+| `/api/matches?profile=<uuid>` | GET | - | Rankade kandidater med delpoäng och förklaring |
+| `/api/competences` | GET | - | Kompetenstaxonomin - förslag i kravformuläret |
+
+## Vyn "Uppdrag"
+
+`/uppdrag` (länk **"⬆ Uppdrag"** i kandidatlistans header) har två delar:
+ett formulär för kravprofilen och den rankade listan.
+
+Formuläret: titel, kund, must-have (taggar), "minst N av M", nice-to-have,
+kravort, pendelorter, minsta senioritet, minsta antal år i IT och vikter per
+del. Taggar väljs ur `GET /api/competences`, så en must-have är alltid en
+riktig tagg.
+
+Listan visar poäng, must-/nice-täckning och erfarenhetens grund. En kandidat
+expanderas för att visa delpoängen per del och hela förklaringen. Kandidater
+som inte täcker must-have hamnar under de godkända, inte borta.
+
+Spara och uppdatera av profilen kräver admin-token (`x-admin-token`) - samma
+token som dubblettsammanslagningen. Läsning och rankning är öppna, eftersom
+det är samma uppgifter som kandidatlistan visar.
 
 ## GDPR i gränssnittet
 

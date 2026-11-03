@@ -453,3 +453,27 @@ psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/test_match.sql
 
 Exempelprofilen `exempel-systemutvecklare` skapas av `schema.sql` (idempotent
 på `slug`) och används för att prova vikterna.
+
+### UI: vyn "Uppdrag"
+
+`/uppdrag` (länk **"⬆ Uppdrag"** i kandidatlistans header) innehåller
+formuläret och den rankade listan.
+
+| Endpoint | Metod | Skydd | Beskrivning |
+| --- | --- | --- | --- |
+| `/api/profiles` | GET | publik | Lista alla kravprofiler |
+| `/api/profiles` | POST | admin-token | Skapa eller uppdatera en profil |
+| `/api/matches?profile=<uuid>` | GET | publik | Rankade kandidater med delpoäng och förklaring |
+| `/api/competences` | GET | publik | Kompetenstaxonomin - förslag i kravformuläret |
+
+Profilen fylls i UI:t och sparas med `POST /api/profiles` (huvudet
+`x-admin-token`). Skrivning kräver token eftersom en kravprofil styr vilka
+kandidater som rankas - en öppen write-endpoint skulle kunna styra listan.
+
+Kompetenserna i formuläret kommer från `GET /api/competences`, så en
+must-have måste vara en riktig tagg. En tagg som inte finns matchar ingenting.
+
+UI:t visar delpoängen per del (must-have, nice-to-have, erfarenhet,
+senioritet, ort, språk, tillgänglighet, datakonfidens) när en kandidat
+expanderas, och skillnaden mellan dokumenterad och uppskattad erfarenhet är
+markerad i listan.

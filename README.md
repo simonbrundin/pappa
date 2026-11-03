@@ -80,6 +80,9 @@ posten. Se `db/README.md` för matchningsregeln i detalj och
 
 ## Uppdragsmatchning
 
+Knappar **"⬆ Uppdrag"** (eller `/uppdrag`) leder till vyn där en kravprofil
+formuleras och kandidaterna rankas mot den.
+
 `fn_match_candidates()` rankar kandidaterna mot en kravprofil i
 `job_profile`. Poängen är alltid delpoäng + förklaring, så att beslutet kan
 motiveras:
@@ -90,5 +93,16 @@ from fn_match_candidates('PROFIL-ID'::uuid)
 where eligible;
 ```
 
-Vikterna ligger i profilens `weights` (jsonb) och justeras per uppdrag utan
-kodändring. Se `db/README.md` (avsnitt 10) och `db/test_match.sql`.
+Profilen sätts upp i UI:t: must-have, "minst N av M", nice-to-have, ort,
+pendelorter, senioritet, minsta antal år och vikter per del. Vikterna ligger i
+profilens `weights` (jsonb) och justeras per uppdrag utan kodändring.
+
+Att spara en kravprofil kräver admin-token (`NUXT_ADMIN_TOKEN`) - samma token
+som dubblettsammanslagningen. Läsning och rankning kräver ingen token.
+
+```bash
+curl localhost:3000/api/profiles
+curl "localhost:3000/api/matches?profile=PROFIL-ID"
+```
+
+Se `db/README.md` (avsnitt 10) och `db/test_match.sql`.
