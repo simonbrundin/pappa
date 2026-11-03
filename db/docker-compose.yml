@@ -1,0 +1,41 @@
+version: "3.9"
+
+# Lokal utvecklingsdatabas - samma schema som produktion.
+#   docker compose -f db/docker-compose.yml up -d
+#   export DATABASE_URL='postgresql://pappa:pappa@127.0.0.1:55432/pappa'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pappa-pg
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: pappa
+      POSTGRES_PASSWORD: pappa
+      POSTGRES_DB: pappa
+    ports:
+      - "55432:5432"
+    volumes:
+      - pappa_pgdata:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pappa -d pappa"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # PgAdmin - GUI för att kika i databasen (valfritt)
+  admin:
+    image: dpage/pgadmin4:latest
+    container_name: pappa-pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pappa@local
+      PGADMIN_DEFAULT_PASSWORD: pappa
+    ports:
+      - "55433:80"
+    profiles: ["admin"]
+    depends_on:
+      - db
+
+volumes:
+  pappa_pgdata:

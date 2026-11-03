@@ -1,0 +1,17 @@
+{
+  "name": "pappa",
+  "private": true,
+  "description": "Masterdatabas för IT-rekrytering i Sundsvall - Neon/Lakebase Postgres",
+  "scripts": {
+    "build": "neon config plan --context-file src/neon/.neon && python3 -m compileall -q db src/neon",
+    "neon:plan": "neon config plan --context-file src/neon/.neon",
+    "neon:deploy": "neon deploy --context-file src/neon/.neon",
+    "neon:env": "neon env pull --context-file src/neon/.neon",
+    "db:migrate": "bash db/migrate.sh",
+    "db:import": "uv run --with \"psycopg[binary]\" --with pyyaml python db/import_from_yaml.py",
+    "db:backup": "bash db/backup.sh",
+    "app:dev": "npm --prefix src/nuxt run dev",
+    "app:build": "npm --prefix src/nuxt run build",
+    "app:typecheck": "npm --prefix src/nuxt run typecheck"
+  }
+}

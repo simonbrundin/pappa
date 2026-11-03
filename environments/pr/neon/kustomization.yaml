@@ -1,0 +1,15 @@
+# DO NOT EDIT MANUALLY
+# Neon i PR-miljön
+#
+# PR-preview kör mot samma Neon-databas som dev och prod. Filerna
+# (pr.neon.env) gitignoras - se README.md.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+secretGenerator:
+  - name: pappa-neon-db
+    envs:
+      - pr.neon.env
+    options:
+      disableNameSuffixHash: true

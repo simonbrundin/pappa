@@ -1,0 +1,13 @@
+# DO NOT EDIT MANUALLY
+# Production environment
+#
+# Databasen är Neon (Lakebase Postgres) - ingen databas i klustret.
+# Secret `pappa-neon-db` skapas externt, se ./neon/README.md.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+  - namespace.yaml
+  - httproute.yaml

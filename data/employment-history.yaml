@@ -1,0 +1,543 @@
+# Anställningshistorik - kuraterad ur publika källor
+#
+# Syfte: ge kandidaterna en CV-liknande historik (var, vad, hur länge) så att
+# erfarenhet kan bedömas på riktigt i stället för gissas ur rollnivå.
+#
+# Regler
+#   1. Varje rad ska ha en källa - 'source' pekar på den URL där uppgiften
+#      står (samma källa som i frölistan där det går att belägga).
+#   2. 'from'/'to' är ISO-datum (YYYY-MM-DD, YYYY-MM eller YYYY).
+#      null = okänt. Båda null = perioden är helt okänd.
+#   3. 'current: true' = pågående tjänst. En person har högst en sådan rad.
+#   4. 'confidence' = hur väl dokumenterad raden är:
+#        high   - belagd av källa (t.ex. pressmeddelande med datum)
+#        medium - utläst ur fritext på en offentlig sida
+#        low    - hypotes, ska verifieras
+#   5. 'stack' = taggar från competence_taxonomy i frölistan.
+#
+# Importen upsertar på (person_id, ref) - samma ref uppdateras, aldrig
+# dupliceras. Den gamla importen skapade en rad per person utan ref; den
+# adopteras av raden med current: true.
+#
+# Underlaget genereras med: python db/extract_employment_candidates.py
+# och kurateras sedan för hand.
+
+people:
+  # -----------------------------------------------------------------------
+  # Tommy Gustafsson - grundade GDM 1992, nu strategisk rådgivare
+  # -----------------------------------------------------------------------
+  - id: gdm-tommy-gustafsson
+    employment:
+      - ref: gustafsson-gdm-grundare
+        org: Aderian GDM (fd GDM Konsult AB)
+        title: Grundare & VD
+        type: employment
+        from: 1992-01-01
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://gdm.se/om-oss/ledning
+        source_type: company_site
+        note: Grundade bolaget 1992. Nu strategisk rådgivare - samma bolag, ny roll.
+
+  # -----------------------------------------------------------------------
+  # Fredrik Larsmarker - operativ chef på Aderian GDM
+  # -----------------------------------------------------------------------
+  - id: gdm-fredrik-larsmarker
+    employment:
+      - ref: larsmarker-gdm
+        org: Aderian GDM (fd GDM Konsult AB)
+        title: Operativ chef / vice VD
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://gdm.se/om-oss/ledning
+        source_type: company_site
+      - ref: larsmarker-mitab
+        org: Mitab
+        title: COO
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: medium
+        source: https://gdm.se/om-oss/ledning
+        source_type: company_site
+        note: Tidigare COO - datum okända.
+      - ref: larsmarker-delete
+        org: Delete Sweden
+        title: Sales Manager
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: medium
+        source: https://gdm.se/om-oss/ledning
+        source_type: company_site
+        note: Tidigare Sales Manager - datum okända.
+
+  # -----------------------------------------------------------------------
+  # Mia Axelsson - VD Knowit Norrland
+  # -----------------------------------------------------------------------
+  - id: knowit-mia-axelsson
+    employment:
+      - ref: axelsson-knowit-vd
+        org: Knowit Norrland / Knowit Solutions Mitt
+        title: VD Knowit Norrland AB
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://www.knowit.se/business-portal/bolagslista/
+        source_type: company_site
+      - ref: axelsson-knowit-kontorchef
+        org: Knowit Norrland / Knowit Solutions Mitt
+        title: Kontorchef Sundsvall
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: low
+        source: https://www.knowit.se/business-portal/bolagslista/
+        source_type: company_site
+        note: Ordning okänd - "Kontorchef Sundsvall" står utan "tid." i källtexten.
+      - ref: axelsson-knowit-konsultchef
+        org: Knowit Norrland / Knowit Solutions Mitt
+        title: Konsultchef
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: low
+        source: https://www.knowit.se/business-portal/bolagslista/
+        source_type: company_site
+        note: Tidigare roll - datum okända.
+      - ref: axelsson-knowit-kam
+        org: Knowit Norrland / Knowit Solutions Mitt
+        title: Key Account Manager
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: low
+        source: https://www.knowit.se/business-portal/bolagslista/
+        source_type: company_site
+        note: Tidigare roll - datum okända.
+
+  # -----------------------------------------------------------------------
+  # Tobias Bergman - Head of Business, Knowit Experience Norrland
+  # (enda personen i listan med dokumenterat datumintervall)
+  # -----------------------------------------------------------------------
+  - id: knowit-tobias-bergman
+    employment:
+      - ref: bergman-knowit-head
+        org: Knowit Experience Norrland AB
+        title: Head of Business
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://www.linkedin.com/in/tobiasbergman
+        source_type: profile
+      - ref: bergman-knowit-teamleader
+        org: Knowit Experience Norrland AB
+        title: Teamleader för .NET-utvecklare
+        type: employment
+        from: 2011-01-01
+        to: 2017-12-31
+        current: false
+        stack: [dotnet]
+        confidence: medium
+        source: https://www.linkedin.com/in/tobiasbergman
+        source_type: profile
+        note: Teamledarroll 2011-2017 inom samma bolag.
+
+  # -----------------------------------------------------------------------
+  # Harriet Wikström - XLENT Sundsvall
+  # -----------------------------------------------------------------------
+  - id: xlent-harriet-wikstrom
+    employment:
+      - ref: wikstrom-xlent
+        org: XLENT Sundsvall AB
+        title: VD / Senior partner
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://www.xlent.se/kontor/sundsvall/
+        source_type: company_site
+        note: Styrelseuppdrag ("vice ordf.") är inte en anställning - därför ingen extra rad.
+
+  # -----------------------------------------------------------------------
+  # Veronica Löfberg - ansvarig för Sundsvallsregionen på Sogeti
+  # -----------------------------------------------------------------------
+  - id: sogeti-veronica-lofberg
+    employment:
+      - ref: lofberg-sogeti-region
+        org: Sogeti Sverige AB
+        title: Ansvarig för Sundsvallsregionen
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: high
+        source: https://news.cision.com/se/sogeti-sverige-ab/r/veronica-lofberg-ny-regionchef-pa-sogeti,c3266196
+        source_type: press
+        note: Utnämnd till regionchef Norr enligt pressmeddelandet.
+      - ref: lofberg-sogeti-regionchef-norr
+        org: Sogeti Sverige AB
+        title: Regionchef Norr
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: high
+        source: https://news.cision.com/se/sogeti-sverige-ab/r/veronica-lofberg-ny-regionchef-pa-sogeti,c3266196
+        source_type: press
+        note: Tidigare roll ("fd Regionchef Norr"). 18 år på Sogeti enligt källan.
+      - ref: lofberg-cgi
+        org: CGI
+        title: Konsultchef Sundsvall/Härnösand
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: high
+        source: https://news.cision.com/se/sogeti-sverige-ab/r/veronica-lofberg-ny-regionchef-pa-sogeti,c3266196
+        source_type: press
+        note: Tidigare CGI-konsultchef - datum okända.
+
+  # -----------------------------------------------------------------------
+  # Thomas Nordin - grundade N62 2009, VD-post sedan 2024
+  # -----------------------------------------------------------------------
+  - id: nordlo-thomas-nordin
+    employment:
+      - ref: nordin-nordlo-vd
+        org: Nordlo Sundsvall AB
+        title: VD
+        type: employment
+        from: 2024-01-01
+        to: null
+        current: true
+        stack: []
+        confidence: low
+        source: https://www.linkedin.com/in/nordinthomas
+        source_type: profile
+        note: 'VD-post sedan 2024 - startdatum okänt, uppskattat till 2024-01-01.'
+      - ref: nordin-n62
+        org: N62 IT Solutions AB
+        title: VD
+        type: employment
+        from: 2009-01-01
+        to: 2024-01-01
+        current: false
+        stack: []
+        confidence: low
+        source: https://www.linkedin.com/in/nordinthomas
+        source_type: profile
+        note: Grundade N62 2009. Slutdatum uppskattat - verifiera.
+
+  # -----------------------------------------------------------------------
+  # Fredrik Linde - IT-arkitekt, grundare Dragon Tech Talk
+  # -----------------------------------------------------------------------
+  - id: dtt-fredrik-linde
+    employment:
+      - ref: linde-acs
+        org: Advanced Cognitive Systems AB
+        title: IT-arkitekt / Grundare
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://www.meetup.com/dragon-tech-talk/
+        source_type: community
+      - ref: linde-sogeti
+        org: Sogeti Sverige AB
+        title: Senior System Developer
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: medium
+        source: https://goodtechconference.se/fredrik-linde
+        source_type: conference
+        note: Titel enligt konferensbiografi - datum okända.
+      - ref: linde-tieto
+        org: Tieto
+        title: null
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: medium
+        source: https://goodtechconference.se/fredrik-linde
+        source_type: conference
+        note: Tidigare anställd - titel och datum okända.
+      - ref: linde-teliasonera
+        org: TeliaSonera
+        title: null
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: medium
+        source: https://goodtechconference.se/fredrik-linde
+        source_type: conference
+        note: Tidigare anställd - titel och datum okända. Inte Telia Cygate AB.
+
+  # -----------------------------------------------------------------------
+  # Petra Söderberg - projektledare på Bron Innovation
+  # -----------------------------------------------------------------------
+  - id: bron-petra-soderberg
+    employment:
+      - ref: soderberg-bron
+        org: Bron Innovation AB
+        title: Projektledare
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: []
+        confidence: medium
+        source: https://www.broninnovation.se/kontakta-oss
+        source_type: company_site
+      - ref: soderberg-sogeti
+        org: Sogeti Sverige AB
+        title: Kontors- och konsultchef
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: []
+        confidence: medium
+        source: https://www.broninnovation.se/nyheter/valkommen-petra-soderberg
+        source_type: company_site
+        note: Tidigare chef - datum okända.
+
+  # -----------------------------------------------------------------------
+  # 2026-11 - tillägg från GTC-bios och bolagsregister
+  # -----------------------------------------------------------------------
+  - id: ocd-kare-nordstrom
+    employment:
+      - ref: nordstrom-orange
+        org: Orange Cyberdefense Sweden AB
+        title: VD
+        type: employment
+        from: 2023-01-01
+        to: null
+        current: true
+        stack: [cybersecurity, it_leadership]
+        confidence: medium
+        source: https://linkedin.com/in/k%C3%A5re-nordstr%C3%B6m-0526529
+        source_type: profile
+        note: "VD för Orange Cyberdefense Sweden sedan januari 2023 (offentlig profil). Titeln bekräftas av GTC-bion."
+      - ref: nordstrom-cygate
+        org: Telia Cygate AB
+        title: Regional Director
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: [cybersecurity, it_leadership]
+        confidence: medium
+        source: https://goodtechconference.se/kare-nordstrom
+        source_type: conference
+        note: "Ledande position på Cygate med ansvar för tillväxt i norra regionen. Datum okända."
+      - ref: nordstrom-telenor
+        org: Telenor AB
+        title: Ledande position
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: [it_leadership]
+        confidence: low
+        source: https://goodtechconference.se/kare-nordstrom
+        source_type: conference
+        note: "Nämnd som tidigare arbetsgivare utan titel. Datum okända."
+      - ref: nordstrom-tdc
+        org: TDC
+        title: Ledande position
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: [it_leadership]
+        confidence: low
+        source: https://goodtechconference.se/kare-nordstrom
+        source_type: conference
+        note: "Nämnd som tidigare arbetsgivare utan titel. Datum okända."
+
+  - id: cygate-christian-holmstedt
+    employment:
+      - ref: holmstedt-cygate
+        org: Telia Cygate AB
+        title: Cybersäkerhetsspecialist
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [cybersecurity, information_security]
+        confidence: high
+        source: https://goodtechconference.se/christian-holmstedt
+        source_type: conference
+        note: "Säkerhetsanalys, säkerhetsarkitektur, incident response, security champion."
+      - ref: holmstedt-polisen
+        org: Polismyndigheten
+        title: Utredare IT-brott, NOA
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: [information_security, security]
+        confidence: medium
+        source: https://goodtechconference.se/christian-holmstedt
+        source_type: conference
+        note: "Bedrägeriutredningar inom IT-brott vid Nationellt Bedrägericenter. Datum okända."
+
+  - id: biometria-per-fahlen
+    employment:
+      - ref: fahlen-biometria
+        org: Biometria AB
+        title: Utvecklare
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [web_development, gnss]
+        confidence: high
+        source: https://goodtechconference.se/per-fahlen
+        source_type: conference
+        note: "Utvecklar teknik för skogsindustrin. 20+ år i mjukvarubranschen."
+
+  - id: propro-teodor-wickman
+    employment:
+      - ref: wickman-propro
+        org: Pro&Pro
+        title: Managementkonsult
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [consulting, digital_strategy]
+        confidence: high
+        source: https://goodtechconference.se/teodor-wickman
+        source_type: conference
+
+  - id: stc-sebastian-bader
+    employment:
+      - ref: bader-stc
+        org: STC Forskningscenter (Mittuniversitetet)
+        title: Forskare
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [iot, research, machine_learning]
+        confidence: high
+        source: https://goodtechconference.se/sebastian-bader
+        source_type: conference
+
+  - id: stc-mattias-onils
+    employment:
+      - ref: onils-stc
+        org: STC Forskningscenter (Mittuniversitetet)
+        title: Professor & institutionschef
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [research, machine_learning]
+        confidence: high
+        source: https://goodtechconference.se/mattias-onils
+        source_type: conference
+
+  - id: dtt-jonatan-stenmark
+    employment:
+      - ref: stenmark-orange
+        org: Orange Cyberdefense Sweden AB
+        title: Cyber Security Architect
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [cybersecurity, information_security]
+        confidence: high
+        source: https://goodtechconference.se/talare-2025
+        source_type: conference
+        note: "Cybersäkerhetsrådgivare. Bakgrund i offentlig förvaltning och försvarsindustri."
+
+  - id: dtt-helena-carell
+    employment:
+      - ref: carell-ssg
+        org: SSG (SecureLink Group)
+        title: Head of Internationalisation & Compliance
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [cybersecurity, risk]
+        confidence: high
+        source: https://goodtechconference.se/talare-2025
+        source_type: conference
+      - ref: carell-airtarget
+        org: Air Target AB
+        title: VD
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: [it_leadership, business_development]
+        confidence: medium
+        source: https://goodtechconference.se/talare-2025
+        source_type: conference
+        note: "Tidigare VD. Datum okända."
+      - ref: carell-vattenfall
+        org: Vattenfall Eldistribution AB
+        title: Säkerhetsskyddschef
+        type: employment
+        from: null
+        to: null
+        current: false
+        stack: [risk, cybersecurity]
+        confidence: medium
+        source: https://goodtechconference.se/talare-2025
+        source_type: conference
+        note: "Tidigare säkerhetsskyddschef. Datum okända."
+
+  - id: gtc25-tony-mc-carrick
+    employment:
+      - ref: mccarrick-atea
+        org: Atea Sverige AB
+        title: Strategisk rådgivare inom AI
+        type: employment
+        from: null
+        to: null
+        current: true
+        stack: [ai, consulting]
+        confidence: high
+        source: https://goodtechconference.se/talare-2025
+        source_type: conference

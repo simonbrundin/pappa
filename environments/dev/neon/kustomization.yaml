@@ -1,0 +1,20 @@
+# DO NOT EDIT MANUALLY
+# Neon-databasen för dev.
+#
+# Dev kör mot samma Neon/Lakebase Postgres som resten av pappa - det finns
+# ingen Postgres i klustret. Secreten genereras ur neon.env, som gitignoras
+# och skapas av ./sync-env.sh (hämtar värdena ur src/neon/.env.local).
+#
+# Kör ./sync-env.sh innan `kustomize build` eller `tilt up`.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+secretGenerator:
+  - name: pappa-neon-db
+    envs:
+      - neon.env
+    options:
+      # Utan detta får secreten ett hash-suffix och deploymenten
+      # hittar inte referensen.
+      disableNameSuffixHash: true

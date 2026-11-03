@@ -1,0 +1,15 @@
+.neon
+node_modules/
+.env.local
+
+# Hemligheter (Neon-credentials) - får aldrig committas
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Databasdumpar - innehåller personuppgifter. Får aldrig committas.
+db/backups/

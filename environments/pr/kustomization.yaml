@@ -1,0 +1,13 @@
+# DO NOT EDIT MANUALLY
+# Denna fil uppdateras automatiskt av GitHub Actions
+#
+# Neon-databasen: resursen ./neon måste finnas med, annars saknas
+# Secret pappa-neon-db. Se ./neon/README.md.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../base
+  - ./neon
+  - httproute.yaml

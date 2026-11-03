@@ -1,0 +1,10 @@
+# Databas-backuper innehåller personuppgifter - får ALDRIG committas
+db/backups/
+*.sql.gz
+*.dump
+*.dump.gz
+
+# Secrets
+.env
+.env.*
+!.env.example

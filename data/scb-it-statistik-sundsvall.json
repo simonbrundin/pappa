@@ -1,0 +1,535 @@
+{
+  "source": {
+    "provider": "Statistiska centralbyrån (SCB)",
+    "api": "PxWebApi v2 - https://api.scb.se/OV0104/v1/doris/sv/ssd",
+    "tables": [
+      "AM0208D/YREG58BAS - Anställda med arbetsplats i regionen (dagbef) efter region, yrke (3-siffrig SSYK 2012) och kön (BAS 2020-2024)",
+      "AM0208D/YREG59BAS - Anställda ... efter region, yrke, arbetsställets sektortillhörighet och kön (BAS)",
+      "AM0208D/YREG56BAS - Anställda ... efter region, yrke, näringsgren SNI 2007 (grov nivå) och kön (BAS)",
+      "AM0208M/YREG60BAS - Anställda med arbetsplats i regionen (dagbef) efter län, yrke (4-siffrig SSYK 2012) och kön (BAS)",
+      "AM0208C/YREG55BAS - Anställda med bostad i regionen (nattbef) efter län, yrke, ålder och kön (BAS)",
+      "BE0101A/FolkmangdDecCKM - Folkmängden per region (2025)"
+    ],
+    "retrieved": "2026-10-27",
+    "note": "Dagbefolkning = personen är folkbokförd på ett annat ställe än arbetsplatsen. 4-siffrig yrkesstatistik finns bara på länsnivå."
+  },
+  "definitions": {
+    "IT-yrken": [
+      "131 IT-chefer",
+      "251 IT-arkitekter, systemutvecklare och testledare m.fl.",
+      "351 Drift-, support- och nätverkstekniker m.fl."
+    ],
+    "counted": "Anställda (ej egenföretagare), folkbokförda 16+ i BAS/Yrkesregistret"
+  },
+  "headcount_3digit_by_region": {
+    "Riket": {
+      "2020": {
+        "it_chefer_131": 13007,
+        "it_specialists_251": 142881,
+        "drift_support_351": 45373,
+        "total_it": 201261
+      },
+      "2021": {
+        "it_chefer_131": 13763,
+        "it_specialists_251": 150141,
+        "drift_support_351": 45745,
+        "total_it": 209649
+      },
+      "2022": {
+        "it_chefer_131": 14683,
+        "it_specialists_251": 161175,
+        "drift_support_351": 46425,
+        "total_it": 222283
+      },
+      "2023": {
+        "it_chefer_131": 15297,
+        "it_specialists_251": 181729,
+        "drift_support_351": 49378,
+        "total_it": 246404
+      },
+      "2024": {
+        "it_chefer_131": 16182,
+        "it_specialists_251": 182732,
+        "drift_support_351": 49503,
+        "total_it": 248417
+      }
+    },
+    "Västernorrlands län": {
+      "2020": {
+        "it_chefer_131": 232,
+        "it_specialists_251": 2829,
+        "drift_support_351": 1062,
+        "total_it": 4123
+      },
+      "2021": {
+        "it_chefer_131": 255,
+        "it_specialists_251": 2993,
+        "drift_support_351": 1020,
+        "total_it": 4268
+      },
+      "2022": {
+        "it_chefer_131": 260,
+        "it_specialists_251": 3096,
+        "drift_support_351": 1057,
+        "total_it": 4413
+      },
+      "2023": {
+        "it_chefer_131": 283,
+        "it_specialists_251": 3339,
+        "drift_support_351": 1050,
+        "total_it": 4672
+      },
+      "2024": {
+        "it_chefer_131": 275,
+        "it_specialists_251": 3349,
+        "drift_support_351": 1050,
+        "total_it": 4674
+      }
+    },
+    "Sundsvall": {
+      "2020": {
+        "it_chefer_131": 175,
+        "it_specialists_251": 2269,
+        "drift_support_351": 665,
+        "total_it": 3109
+      },
+      "2021": {
+        "it_chefer_131": 178,
+        "it_specialists_251": 2369,
+        "drift_support_351": 662,
+        "total_it": 3209
+      },
+      "2022": {
+        "it_chefer_131": 183,
+        "it_specialists_251": 2455,
+        "drift_support_351": 706,
+        "total_it": 3344
+      },
+      "2023": {
+        "it_chefer_131": 191,
+        "it_specialists_251": 2579,
+        "drift_support_351": 725,
+        "total_it": 3495
+      },
+      "2024": {
+        "it_chefer_131": 189,
+        "it_specialists_251": 2576,
+        "drift_support_351": 704,
+        "total_it": 3469
+      }
+    },
+    "Örnsköldsvik": {
+      "2020": {
+        "it_chefer_131": 34,
+        "it_specialists_251": 299,
+        "drift_support_351": 168,
+        "total_it": 501
+      },
+      "2021": {
+        "it_chefer_131": 40,
+        "it_specialists_251": 333,
+        "drift_support_351": 165,
+        "total_it": 538
+      },
+      "2022": {
+        "it_chefer_131": 38,
+        "it_specialists_251": 346,
+        "drift_support_351": 152,
+        "total_it": 536
+      },
+      "2023": {
+        "it_chefer_131": 47,
+        "it_specialists_251": 414,
+        "drift_support_351": 136,
+        "total_it": 597
+      },
+      "2024": {
+        "it_chefer_131": 45,
+        "it_specialists_251": 403,
+        "drift_support_351": 149,
+        "total_it": 597
+      }
+    },
+    "Härnösand": {
+      "2020": {
+        "it_chefer_131": 8,
+        "it_specialists_251": 140,
+        "drift_support_351": 95,
+        "total_it": 243
+      },
+      "2021": {
+        "it_chefer_131": 11,
+        "it_specialists_251": 151,
+        "drift_support_351": 62,
+        "total_it": 224
+      },
+      "2022": {
+        "it_chefer_131": 13,
+        "it_specialists_251": 152,
+        "drift_support_351": 68,
+        "total_it": 233
+      },
+      "2023": {
+        "it_chefer_131": 15,
+        "it_specialists_251": 172,
+        "drift_support_351": 65,
+        "total_it": 252
+      },
+      "2024": {
+        "it_chefer_131": 18,
+        "it_specialists_251": 188,
+        "drift_support_351": 66,
+        "total_it": 272
+      }
+    },
+    "Timrå": {
+      "2020": {
+        "it_chefer_131": 4,
+        "it_specialists_251": 56,
+        "drift_support_351": 19,
+        "total_it": 79
+      },
+      "2021": {
+        "it_chefer_131": 10,
+        "it_specialists_251": 61,
+        "drift_support_351": 24,
+        "total_it": 95
+      },
+      "2022": {
+        "it_chefer_131": 8,
+        "it_specialists_251": 60,
+        "drift_support_351": 24,
+        "total_it": 92
+      },
+      "2023": {
+        "it_chefer_131": 8,
+        "it_specialists_251": 60,
+        "drift_support_351": 18,
+        "total_it": 86
+      },
+      "2024": {
+        "it_chefer_131": 7,
+        "it_specialists_251": 45,
+        "drift_support_351": 24,
+        "total_it": 76
+      }
+    },
+    "Ånge": {
+      "2020": {
+        "it_chefer_131": 1,
+        "it_specialists_251": 15,
+        "drift_support_351": 13,
+        "total_it": 29
+      },
+      "2021": {
+        "it_chefer_131": 1,
+        "it_specialists_251": 14,
+        "drift_support_351": 15,
+        "total_it": 30
+      },
+      "2022": {
+        "it_chefer_131": 1,
+        "it_specialists_251": 17,
+        "drift_support_351": 13,
+        "total_it": 31
+      },
+      "2023": {
+        "it_chefer_131": 1,
+        "it_specialists_251": 20,
+        "drift_support_351": 15,
+        "total_it": 36
+      },
+      "2024": {
+        "it_chefer_131": 1,
+        "it_specialists_251": 21,
+        "drift_support_351": 8,
+        "total_it": 30
+      }
+    },
+    "Kramfors": {
+      "2020": {
+        "it_chefer_131": 6,
+        "it_specialists_251": 26,
+        "drift_support_351": 63,
+        "total_it": 95
+      },
+      "2021": {
+        "it_chefer_131": 9,
+        "it_specialists_251": 35,
+        "drift_support_351": 61,
+        "total_it": 105
+      },
+      "2022": {
+        "it_chefer_131": 12,
+        "it_specialists_251": 39,
+        "drift_support_351": 60,
+        "total_it": 111
+      },
+      "2023": {
+        "it_chefer_131": 15,
+        "it_specialists_251": 52,
+        "drift_support_351": 51,
+        "total_it": 118
+      },
+      "2024": {
+        "it_chefer_131": 11,
+        "it_specialists_251": 70,
+        "drift_support_351": 58,
+        "total_it": 139
+      }
+    },
+    "Sollefteå": {
+      "2020": {
+        "it_chefer_131": 4,
+        "it_specialists_251": 24,
+        "drift_support_351": 39,
+        "total_it": 67
+      },
+      "2021": {
+        "it_chefer_131": 6,
+        "it_specialists_251": 30,
+        "drift_support_351": 31,
+        "total_it": 67
+      },
+      "2022": {
+        "it_chefer_131": 5,
+        "it_specialists_251": 27,
+        "drift_support_351": 34,
+        "total_it": 66
+      },
+      "2023": {
+        "it_chefer_131": 6,
+        "it_specialists_251": 42,
+        "drift_support_351": 40,
+        "total_it": 88
+      },
+      "2024": {
+        "it_chefer_131": 4,
+        "it_specialists_251": 46,
+        "drift_support_351": 41,
+        "total_it": 91
+      }
+    }
+  },
+  "sector_2024": {
+    "Riket": {
+      "näringslivet": 213827,
+      "staten": 17758,
+      "kommun": 8345,
+      "region": 5958,
+      "samtliga sektorer": 0
+    },
+    "Västernorrlands län": {
+      "näringslivet": 2962,
+      "staten": 1346,
+      "kommun": 229,
+      "region": 113,
+      "samtliga sektorer": 0
+    },
+    "Sundsvall": {
+      "näringslivet": 2112,
+      "staten": 1245,
+      "kommun": 88,
+      "region": 9,
+      "samtliga sektorer": 0
+    },
+    "Örnsköldsvik": {
+      "näringslivet": 529,
+      "staten": 4,
+      "kommun": 43,
+      "region": 18,
+      "samtliga sektorer": 0
+    },
+    "Härnösand": {
+      "näringslivet": 89,
+      "staten": 66,
+      "kommun": 25,
+      "region": 86,
+      "samtliga sektorer": 0
+    },
+    "Timrå": {
+      "näringslivet": 64,
+      "staten": 1,
+      "kommun": 11,
+      "region": 0,
+      "samtliga sektorer": 0
+    },
+    "Ånge": {
+      "näringslivet": 14,
+      "staten": 9,
+      "kommun": 7,
+      "region": 0,
+      "samtliga sektorer": 0
+    },
+    "Kramfors": {
+      "näringslivet": 112,
+      "staten": 8,
+      "kommun": 19,
+      "region": 0,
+      "samtliga sektorer": 0
+    },
+    "Sollefteå": {
+      "näringslivet": 42,
+      "staten": 13,
+      "kommun": 36,
+      "region": 0,
+      "samtliga sektorer": 0
+    }
+  },
+  "naring_2024": {
+    "2281": {
+      "jordbruk/skog/fiske": 5,
+      "tillverkning": 141,
+      "energi/miljö": 24,
+      "bygg": 6,
+      "handel": 54,
+      "transport": 4,
+      "hotell/restaurang": 5,
+      "information & kommunikation": 1562,
+      "finans/försäkring": 278,
+      "fastigheter": 10,
+      "företagstjänster (inkl. IT-konsult)": 172,
+      "offentlig förvaltning": 1145,
+      "utbildning": 26,
+      "vård & omsorg": 13,
+      "kultur/personal": 23
+    },
+    "22": {
+      "jordbruk/skog/fiske": 24,
+      "tillverkning": 302,
+      "energi/miljö": 44,
+      "bygg": 24,
+      "handel": 95,
+      "transport": 11,
+      "hotell/restaurang": 5,
+      "information & kommunikation": 1979,
+      "finans/försäkring": 313,
+      "fastigheter": 20,
+      "företagstjänster (inkl. IT-konsult)": 350,
+      "offentlig förvaltning": 1383,
+      "utbildning": 43,
+      "vård & omsorg": 42,
+      "kultur/personal": 38
+    },
+    "2284": {
+      "jordbruk/skog/fiske": 13,
+      "tillverkning": 118,
+      "energi/miljö": 5,
+      "bygg": 2,
+      "handel": 20,
+      "transport": 0,
+      "hotell/restaurang": 0,
+      "information & kommunikation": 264,
+      "finans/försäkring": 2,
+      "fastigheter": 9,
+      "företagstjänster (inkl. IT-konsult)": 97,
+      "offentlig förvaltning": 47,
+      "utbildning": 1,
+      "vård & omsorg": 19,
+      "kultur/personal": 0
+    },
+    "2280": {
+      "jordbruk/skog/fiske": 1,
+      "tillverkning": 3,
+      "energi/miljö": 4,
+      "bygg": 6,
+      "handel": 4,
+      "transport": 0,
+      "hotell/restaurang": 0,
+      "information & kommunikation": 47,
+      "finans/försäkring": 5,
+      "fastigheter": 1,
+      "företagstjänster (inkl. IT-konsult)": 64,
+      "offentlig förvaltning": 112,
+      "utbildning": 12,
+      "vård & omsorg": 6,
+      "kultur/personal": 7
+    }
+  },
+  "four_digit_county": {
+    "Västernorrlands län": {
+      "1311": {
+        "label": "IT-chefer, nivå 1",
+        "vansternorrland_2024": 71,
+        "riket_2024": 4836
+      },
+      "1312": {
+        "label": "IT-chefer, nivå 2",
+        "vansternorrland_2024": 204,
+        "riket_2024": 11346
+      },
+      "2511": {
+        "label": "Systemanalytiker och IT-arkitekter m.fl.",
+        "vansternorrland_2024": 513,
+        "riket_2024": 28861
+      },
+      "2512": {
+        "label": "Mjukvaru- och systemutvecklare m.fl.",
+        "vansternorrland_2024": 1540,
+        "riket_2024": 110698
+      },
+      "2513": {
+        "label": "Utvecklare inom spel och digitala media",
+        "vansternorrland_2024": 20,
+        "riket_2024": 4551
+      },
+      "2514": {
+        "label": "Systemtestare och testledare",
+        "vansternorrland_2024": 176,
+        "riket_2024": 6794
+      },
+      "2515": {
+        "label": "Systemförvaltare m.fl.",
+        "vansternorrland_2024": 163,
+        "riket_2024": 7331
+      },
+      "2516": {
+        "label": "IT-säkerhetsspecialister",
+        "vansternorrland_2024": 57,
+        "riket_2024": 4330
+      },
+      "2519": {
+        "label": "Övriga IT-specialister",
+        "vansternorrland_2024": 880,
+        "riket_2024": 20167
+      },
+      "3511": {
+        "label": "Drifttekniker, IT",
+        "vansternorrland_2024": 265,
+        "riket_2024": 12296
+      },
+      "3512": {
+        "label": "Supporttekniker, IT",
+        "vansternorrland_2024": 385,
+        "riket_2024": 19292
+      },
+      "3513": {
+        "label": "Systemadministratörer",
+        "vansternorrland_2024": 94,
+        "riket_2024": 4562
+      },
+      "3514": {
+        "label": "Nätverks- och systemtekniker m.fl.",
+        "vansternorrland_2024": 295,
+        "riket_2024": 10973
+      },
+      "3515": {
+        "label": "Webbmaster och webbadministratörer",
+        "vansternorrland_2024": 11,
+        "riket_2024": 2380
+      }
+    }
+  },
+  "population_2025": {
+    "00": 10605529,
+    "22": 240640,
+    "2281": 98962,
+    "2284": 55338,
+    "2280": 24348
+  },
+  "nattbefolkning_2024": {
+    "22": 4156,
+    "24": 4481,
+    "01": 89402
+  }
+}

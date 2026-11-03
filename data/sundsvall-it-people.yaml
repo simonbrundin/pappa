@@ -1,0 +1,2645 @@
+# ============================================================================
+# IT-personal i Sundsvall-området — frölista för rekrytering
+# ============================================================================
+# Genererad: 2026-11-08 (uppdaterad: ledning ur bolagsregister + GTC-bios)
+# Metod:       Webbsökning (Exa) + hämtning av organisations- och konferenssidor,
+#             LinkedIn-profiler som exponerats i sökresultat, samt 2026-11
+#             offentligt bolagsregister (Bolagsverket via allabolag/
+#             alltombolag/bolagsfakta/rating.se) för styrelser i små IT-bolag.
+#
+# VIKTIGT - vad detta är och inte är:
+#   Detta är en FRÖLISTA, inte "alla IT-personer i Sundsvall".
+#   Populationen är MÄTT, inte uppskattad, via SCB:s Yrkesregister
+#   (dagbefolkning, BAS 2024):
+#     - Sundsvalls kommun:  3 469 anställda i IT-yrken
+#         (189 IT-chefer, 2 576 IT-specialister, 704 drift/support/nätverk)
+#     - Västernorrlands län: 4 674 anställda i IT-yrken
+#     - Riket: 248 417
+#   Se `data/scb-it-statistik-sundsvall.json` för rådata och tabell-ID.
+#   140 namngivna personer = ~4 % av Sundsvalls IT-arbetsplatser. Webben kan
+#   aldrig ge hela populationen; filen ger de som är offentligt synliga i
+#   ledning, team-sidor, konferensprogram, community-spelningar och bolagsregister.
+#
+#   Täckningsluckor: anonyma utvecklare (utan chefroll, utan talarepass,
+#   utan publicerad profil), folk som bytt jobb, och folk i bolag utan
+#   publicerade team-sidor. Sedan 2026-11 är ledningen i 15 mindre lokala
+#   IT-bolag täckt via bolagsregistret (Portalplus, Crestit, Swedish
+#   Connection, Arkaden, Synetics, Syndis, IT-Entreprenörerna, Fostira, SDK,
+#   Milsvida, Not Not, CoreIT, Agilis, Software Dynamics, Retail Data,
+#   goLive). Kvarvarande luckor: Koneo, A3 IT, Why IT (uppköpt av Nethouse),
+#   Amplifyit, Arcus/StjärnaFyrkant, Sundsvalls It & Automation, Crownit
+#   samt alla bolag utan publicerad styrelse.
+#
+# GDPR:
+#   Namn, titel, arbetsgivare och publicerad affärsmejl/telefon = personuppgift.
+#   Rättslig grund för rekryteringskontakt: legitima intressen (Art. 6.1.f).
+#   Detta innebär KRAV PÅ ART. 14-INFORMATION till varje kontaktad person
+#   (information inom en månad: vem ni är, varifrån uppgiften kommer, hur
+#   länge ni sparar, rätten att invända). Se `legal` nedan.
+#   Personuppgifter om tredje part får INTE förekomma i allmänna handlingar
+#   (OSL 21 kap. 7 §) - men det gäller myndigheters utlämnande, inte er
+#   egen rekryteringsdatabas. Egen databas kräver istället dokumenterad
+#   intresseavvägning + information + gallring.
+#
+#   Publicerade affärskontakter på en arbetsgivares egen webbplats är av
+#  sedda avsedda för kontakt. Använd dem i rekryteringssyfte, inte för
+#  massutskick. Se `legal.do_not` och `next_steps`.
+# ============================================================================
+
+meta:
+  title: IT-personal i Sundsvall-området
+  version: 2
+  generated: 2026-11-08
+  generated_by: pi-agent (webb-research + bolagsregister)
+  geography:
+    primary: Sundsvalls kommun
+    secondary: [Härnösand, Timrå, Ånge, Kramfors, Sollefteå, Örnsköldsvik]
+  confidence_scale:
+    high: Namn, titel och organisation verifierad på organs egen webbplats eller i offentligt bolagsregister
+    medium: Namn och organisation verifierad, titel från sekundär källa
+    low: Namn verifierat, organisation/ort härledd från kontext
+  population_estimate:
+    source: SCB Yrkesregistret, tabell AM0208D/YREG58BAS (dagbefolkning, BAS 2024)
+    it_people_sundsvall_kommun: 3469
+    it_people_vasternorrlands_lan: 4674
+    it_people_riket: 248417
+    breakdown_sundsvall_2024:
+      it_chefer: 189
+      it_specialists_architects_developers_test: 2576
+      drift_support_network: 704
+    sector_split_sundsvall_2024:
+      kommun: 88
+      private_naringsliv: 2112
+      region: 9
+      staten: 1245
+    named_in_this_file: 140
+    coverage_pct: ~4% av IT-arbetsplatserna i Sundsvall
+    raw_data: data/scb-it-statistik-sundsvall.json
+    sundsvall_share_of_county_it_workplaces_pct: 74
+  competition_map:
+    - { org: "Aderian GDM (fd GDM Konsult)", employees: 105, site: Sundsvall }
+    - { org: "Knowit Norrland", employees: 80, site: Sundsvall }
+    - { org: "Sogeti Sundsvall", employees: 70, site: Sundsvall }
+    - { org: "Visionite Sundsvall", employees: "50+", site: Sundsvall }
+    - { org: "XLENT Sundsvall", employees: 48, site: Sundsvall }
+    - { org: "CoreIT", employees: 103, site: Örnsköldsvik }
+    - { org: "Telia Cygate Sundsvall", employees: "~10", site: Sundsvall }
+    - { org: "Nordlo Sundsvall (fd N62)", employees: 8, site: Sundsvall }
+    - { org: "Portalplus", employees: 19, site: Sundsvall }
+
+legal:
+  lawful_basis: legitimate_interests
+  art_14_required: true
+  art_14_note: "Skicka information om vilka ni är, varifrån uppgiften kom, och hur ni behandlar den, i samband med eller inom en månad efter första kontakt."
+  retention_recommendation_months: 6
+  retention_note: "Radera personen ur bevakningslistan 6 månader efter senaste kontakt om inget svar. Dokumentera i er avsaknad-av-kontaktlista."
+  do_not:
+    - "Massutskicka mejl till hela listan - marknaden är ~1 000 personer, det syns."
+    - "Kontakta samma person mer än en gång utan svar."
+    - "Använd inte offentliga e-postadresser för kallkontakt utanför arbetsgivarens publicerade rekryteringsflöde."
+    - "Be anställda köra LinkedIn-scraping från sina privata konton."
+people:
+  - id: fostira-alexander-mollersen
+    name: Alexander Möllersen
+    title: Styrelseordförande
+    org: "Fostira Webb & Consulting AB"
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [ai, automation, consulting]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/fostira-webb-consulting-ab/sundsvall/konsulter/2KIWFZWI5YF3I, type: public_record }
+    confidence: high
+    notes: Bolaget beskriver sig som AI-byrå som utvecklar och implementerar AI-lösningar.
+  - id: visionite-amanda-ahlin
+    name: Amanda Åhlin
+    title: Affärschef
+    org: Visionite AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [business_development, erp, sales]
+    contact: { email: "amanda.ahlin@visionite.se", phone: +46 70 387 76 22 }
+    sources:
+      - { url: https://visionite.se/vara-kontor/sundsvall/, type: org_website }
+    confidence: high
+  - id: dtt-anders-abel
+    name: Anders Abel
+    title: Senior .NET-utvecklare och grundare
+    org: Sustainsys AB
+    org_type: privat
+    location: Härnösand
+    location_confidence: low
+    seniority: senior
+    competence: [api, dotnet, identity, oauth, oidc]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+      - { url: https://goodtechconference.se/talare-2025, type: conference }
+    confidence: medium
+  - id: xlent-anders-franzen
+    name: Anders Franzén
+    title: Styrelseordförande XLENT Sundsvall AB
+    org: XLENT Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, it_leadership]
+    contact: { email: "anders.franzen@xlent.se", phone: +46 70 526 75 15 }
+    sources:
+      - { url: https://www.allabolag.se/foretag/xlent-sundsvall-ab/sundsvall/konsulter/2K3IC3RI5YF3I, type: other }
+      - { url: https://www.xlent.se/om-oss/, type: org_website }
+    confidence: high
+  - id: swconn-anders-niklas-lord
+    name: Anders Niklas Lord
+    title: Styrelseledamot
+    org: Swedish Connection AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, networks]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566485677-Swedish_Connection_AB, type: public_record }
+    confidence: high
+  - id: agilis-anders-sjoberg
+    name: Anders Sjöberg
+    title: Styrelseledamot
+    org: Agilis IT Konsult AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/befattningshavare/agilis-it-konsult-ab/sundsvall/konsulter/2K2EP9EI5YF3I, type: public_record }
+    confidence: high
+    notes: Enda styrelseledamoten i ett bolag med 1 anställd - de facto ägare.
+  - id: nordlo-anders-stromsten
+    name: Anders Strömsten
+    title: Affärsområdeschef Nordlo
+    org: Nordlo Group AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [business_development, infrastructure, it_leadership]
+    contact: { email: "anders.stromsten@nordlo.com", phone: +46 70 829 65 20 }
+    sources:
+      - { url: "https://news.cision.com/se/nordlo/r/sundsvallsbolaget-n62-it-solutions-kops-upp-av-it-koncernen-nordlo-som-vaxer-i-norrland,c3963880", type: other }
+    confidence: high
+  - id: retaildata-andreas-linnsen
+    name: Andreas Linnsén
+    title: VD
+    org: Retail Data Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_central, consulting, retail_it]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/retail-data-sundsvall-ab-556772-0619, type: public_record }
+    confidence: high
+  - id: sdyn-andreas-pousette
+    name: Andreas Pousette
+    title: VD
+    org: Software Dynamics IT-Konsult AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [app_development, consulting, web_development]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/software-dynamics-it-konsult-ab/sundsvall/konsulter/2K3F6YJI5YF3I, type: public_record }
+    confidence: high
+    notes: "Bolaget gör webbutveckling, egen mjukvara och digital bildproduktion."
+  - id: crestit-andreas-ohman
+    name: Andreas Öhman
+    title: Styrelseledamot
+    org: Crestit IT AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/crestit-it-ab/sundsvall/konsulter/2KHS4KLI5YF3I, type: public_record }
+    confidence: high
+  - id: bron-angelica-lindqvist
+    name: Angelica Lindqvist
+    title: "Kommunikatör & projektledare"
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: mid
+    competence: [communication, community, project_management]
+    contact: { email: "angelica.lindqvist@broninnovation.se", phone: +46 70 217 32 59 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: knowit-mia-axelsson
+    name: Anna Maria (Mia) Axelsson
+    title: VD Knowit Norrland AB
+    org: Knowit Norrland / Knowit Solutions Mitt
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 30
+    competence: [business_development, consulting, it_leadership]
+    contact: { email: "sundsvall@knowit.se", phone: +46 8 700 66 00 }
+    sources:
+      - { url: https://se.linkedin.com/posts/miaaxelsson_vi-ser-fram-emot-att-flytta-in-i-nya-lokaler-activity-7406715073458724864-J4h7, type: linkedin_public }
+      - { url: https://www.knowit.se/business-portal/bolagslista/, type: org_website }
+    confidence: high
+    notes: "30+ år erfarenhet. Kontorchef Sundsvall, tid. Konsultchef, Key Account Manager. Kontor Sjögatan 23."
+  - id: gdm-anna-sundstrom
+    name: Anna Sundström
+    title: Teamchef Drift
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [it_production, operations, service_desk]
+    contact: { email: "anna.sundstrom@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: gtc-anne-temin
+    name: Anne Temin
+    title: Talare GTC 2025 (Framtidens elnät)
+    org: Övik Energi AB
+    org_type: privat
+    location: Örnsköldsvik
+    location_confidence: medium
+    seniority: senior
+    competence: [digital_transformation, energy_systems]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: syndis-anton-egilsson
+    name: Anton Már Egilsson
+    title: VD och styrelseordförande
+    org: Syndis AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting, cybersecurity, information_security]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/syndis-ab/sundsvall/konsulter/2K3QEKUI5YF3I, type: public_record }
+    confidence: high
+    notes: VD sedan 2025-12-01. Bolaget gör IT-säkerhetskonsulting.
+  - id: xlent-bengt-berglund
+    name: Bengt Berglund
+    title: Kontaktperson Sundsvall
+    org: XLENT Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, customer_management]
+    contact: { email: "bengt.berglund@xlent.se", phone: +46 73 398 02 29 }
+    sources:
+      - { url: https://www.xlent.se/kontor/sundsvall/, type: org_website }
+    confidence: high
+  - id: dtt-bobo-haggstrom
+    name: Bobo Häggström
+    title: Utvecklare / styrelseledamot
+    org: Not Not Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [backend, event_driven, kafka, microservices]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+      - { url: https://www.alltombolag.se/foretag/not-not-consulting-ab-559102-2255, type: public_record }
+    confidence: medium
+  - id: crestit-christer-abrahamsson
+    name: Christer Abrahamsson
+    title: Styrelseledamot
+    org: Crestit IT AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/crestit-it-ab/sundsvall/konsulter/2KHS4KLI5YF3I, type: public_record }
+    confidence: high
+  - id: coreit-christian-dempe
+    name: Christian Dempe
+    title: Styrelseordförande
+    org: CoreIT AB
+    org_type: privat
+    location: Örnsköldsvik
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting, it_strategy]
+    contact: {}
+    sources:
+      - { url: "https://www.allabolag.se/befattningshavare/coreit-ab/domsj%C3%B6/konsulter/2K2LH5HI5YF3I", type: public_record }
+    confidence: high
+  - id: cygate-christian-holmstedt
+    name: Christian Holmstedt
+    title: Cybersäkerhetsspecialist
+    org: Telia Cygate AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cybersecurity, information_security, threat_intelligence]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/christian-holmstedt, type: conference }
+    confidence: high
+    notes: "Säkerhetsanalys, säkerhetsarkitektur, incident response och security champion. Tidigare Polisen NOA, bedrägeriutredningar IT-brott vid Nationellt Bedrägericenter."
+  - id: gdm-christopher-sundstrom
+    name: Christopher Sundström
+    title: Kundteamschef
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, customer_management]
+    contact: { email: "christopher.sundstrom@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: milsvida-daniel-kjellqvist
+    name: Daniel Kjellqvist
+    title: Styrelseordförande och vice VD
+    org: Milsvida AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, consulting]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/milsvida-ab-559245-0356, type: public_record }
+    confidence: high
+  - id: cygate-daniel-stegeby
+    name: Daniel Stegeby
+    title: "Kontorsansvarig & projektledare, Cygate Sundsvall"
+    org: Telia Cygate AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [it_operations, networking, project_management]
+    contact: {}
+    sources:
+      - { url: https://www.teliacygate.se/, type: other }
+    confidence: medium
+    notes: Publicerad 2016 - positionen kan ha ändrats. Verifiera före kontakt.
+  - id: portalplus-david-jonsson
+    name: David Jonsson
+    title: VD
+    org: Portalplus AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, it_strategy, managed_it]
+    contact: {}
+    sources:
+      - { url: "https://boolag.se/bolag/Portalplus%20AB/5566592316/8128ce7c-fb3e-4322-8204-fae76517af6f", type: public_record }
+      - { url: https://www.largestcompanies.se/foretag/Portalplus-AB-455743/beslutsfattare, type: public_record }
+    confidence: medium
+    notes: VD enligt Largestcompanies. Registret visar David Rune Jonsson som tidigare styrelsesuppleant. Portalplus ingår i Mainport-koncernen.
+  - id: nordlo-david-sandgren
+    name: David Sandgren
+    title: Medgrundare N62 IT Solutions / extern vice VD Nordlo Sundsvall AB
+    org: Nordlo Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [infrastructure, it_operations, networks]
+    contact: {}
+    sources:
+      - { url: "https://news.cision.com/se/nordlo/r/sundsvallsbolaget-n62-it-solutions-kops-upp-av-it-koncernen-nordlo-som-vaxer-i-norrland,c3963880", type: other }
+      - { url: https://www.allabolag.se/foretag/nordlo-sundsvall-ab/sundsvall/konsulter/2K2ZC8SI5YF3I, type: other }
+    confidence: high
+  - id: synetics-david-wiklund
+    name: David Wiklund
+    title: Styrelseledamot
+    org: Synetics Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [backend, consulting, system_development]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/synetics-consulting-ab/sundsvall/konsulter/2K3C9X3I5YF3I, type: public_record }
+    confidence: high
+  - id: fostira-edwin-dellkrans
+    name: Edwin Dellkrans
+    title: Styrelseledamot
+    org: "Fostira Webb & Consulting AB"
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [ai, consulting, web_development]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/fostira-webb-consulting-ab-559463-5004, type: public_record }
+    confidence: high
+  - id: visionite-ellen-engstrom
+    name: Ellen Engström
+    title: Affärschef
+    org: Visionite AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [business_development, erp, sales]
+    contact: { email: "ellen.engstrom@visionite.se", phone: +46 72 230 21 89 }
+    sources:
+      - { url: https://visionite.se/vara-kontor/sundsvall/, type: org_website }
+    confidence: high
+  - id: kommun-emelie-holmlund
+    name: Emelie Holmlund
+    title: Sektionschef strategi och styrning
+    org: Sundsvalls kommun
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [governance, it_strategy, project_management, public_sector_it]
+    contact: {}
+    sources:
+      - { url: https://utveckling.sundsvall.se/att-jobba-hos-oss/vi-som-jobbar-har, type: org_website }
+    confidence: high
+  - id: rvn-emmeli-gustafsson
+    name: Emmeli Gustafsson
+    title: Tf. Enhetschef IT Gemensamma funktioner
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: low
+    seniority: lead
+    competence: [enterprise_architecture, it_leadership, public_sector_it]
+    contact: {}
+    sources:
+      - { url: https://theorg.com/org/region-vasternorrland, type: other }
+    confidence: low
+    notes: "Källa: The Org (org-schema). Begränsad offentlighet - verifiera via allmän handling."
+  - id: bron-erika-hallstrom
+    name: Erika Hällström
+    title: Projektledare
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [coaching, employer_branding, project_management, recruiting]
+    contact: { email: "erika.hallstrom@broninnovation.se", phone: +46 70 633 04 13 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: sogeti-felicia-ostlund
+    name: Felicia Östlund
+    title: "Team Manager & Talent Acquisition, Sundsvall"
+    org: Sogeti Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, recruiting, team_leadership]
+    contact: {}
+    sources:
+      - { url: https://www.sogeti.se/sundsvall/, type: org_website }
+    confidence: high
+  - id: bron-fredrik-ahlmark
+    name: Fredrik Ahlmark
+    title: Projektledare
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [marketing, project_management, technical_delivery, ui_design, ux]
+    contact: { email: "fredrik.ahlmark@broninnovation.se", phone: +46 70 573 36 59 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: nordlo-fredrik-almen
+    name: Fredrik Almén
+    title: Koncernchef Nordlo / styrelseordförande Nordlo Sundsvall
+    org: Nordlo Group AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: cxo
+    competence: [business_development, it_leadership]
+    contact: {}
+    sources:
+      - { url: "https://news.cision.com/se/nordlo/r/sundsvallsbolaget-n62-it-solutions-kops-upp-av-it-koncernen-nordlo-som-vaxer-i-norrland,c3963880", type: other }
+      - { url: https://www.bolagsfakta.se/5567896252-Nordlo_Sundsvall_AB, type: other }
+    confidence: medium
+  - id: gdm-fredrik-larsmarker
+    name: Fredrik Larsmarker
+    title: Operativ chef / vice VD
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 34
+    competence: [cloud, infrastructure, it_sales, it_strategy, managed_it, security]
+    contact: { email: "fredrik.larsmarker@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+      - { url: https://linkedin.com/in/fredrik-larsmarker-2418783, type: linkedin_public }
+    confidence: high
+    notes: "34 års erfarenhet. Tidigare COO på Mitab, Sales Manager på Delete Sweden."
+  - id: dtt-fredrik-linde
+    name: Fredrik Linde
+    title: Grundare Dragon Tech Talk / IT-arkitekt
+    org: Advanced Cognitive Systems AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    it_experience_years: 19
+    competence: [ai, architecture, gnss, iot, system_development, webassembly]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/fredrik-linde, type: other }
+      - { url: https://www.meetup.com/dragon-tech-talk/, type: community }
+    confidence: high
+    notes: "19+ år erfarenhet. Tid. Senior System Developer på Sogeti, TeliaSonera, Tieto. Egen IT-lösning inom skogssektorn. Kör onboarding av praktikanter."
+  - id: knowit-fredrik-mollerstrand
+    name: Fredrik Möllerstrand
+    title: (ej angiven på LinkedIn-post) - medverkade i webinar om AI-agenter
+    org: Knowit Solutions
+    org_type: privat
+    location: Sundsvall
+    location_confidence: low
+    seniority: senior
+    competence: [agentic_ai, ai, devops]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/showcase/knowit-solutions/, type: linkedin_public }
+    confidence: low
+  - id: arkaden-gert-soderberg
+    name: Gert Söderberg
+    title: Styrelseordförande
+    org: Arkaden Konsult AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/arkaden-konsult-ab-556563-1404, type: public_record }
+    confidence: high
+  - id: syndis-gudjon-agustsson
+    name: Guðjón Ingi Ágústsson
+    title: Styrelseledamot
+    org: Syndis AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cybersecurity, information_security]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/syndis-ab-556915-8990, type: public_record }
+    confidence: high
+  - id: knowit-hampus-frojholm
+    name: Hampus Fröjdholm
+    title: AI Tech Lead
+    org: Knowit Norrland / Knowit Solutions Mitt
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [ai, architecture, cloud]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/posts/sandraabremark_weareknowit-knowitsolutions-activity-7368353813365145603-ARvz, type: linkedin_public }
+    confidence: medium
+    notes: Anställd 2025-09.
+  - id: kommun-hanna-jonzon
+    name: Hanna Jonzon
+    title: Digital strateg
+    org: Sundsvalls kommun
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: mid
+    competence: [communication, digital_strategy, service_design]
+    contact: {}
+    sources:
+      - { url: https://utveckling.sundsvall.se/att-jobba-hos-oss/vi-som-jobbar-har, type: org_website }
+    confidence: high
+  - id: gtc-hanna-linderstal
+    name: Hanna Linderstål
+    title: "Senior cybersecurity advisor, keynotetalare GTC 2025"
+    org: EARHART Business Protection Agency
+    org_type: privat
+    location: okänd (regionen antas)
+    location_confidence: low
+    seniority: senior
+    competence: [ai_security, cybersecurity, risk, speaking, threat_intelligence]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+    confidence: medium
+  - id: bron-hanna-wallin
+    name: Hanna Wallin
+    title: Innovationsledare
+    org: Bron Innovation AB
+    org_type: privat
+    location: Örnsköldsvik
+    location_confidence: medium
+    seniority: lead
+    competence: [digital_transformation, event_organisation, innovation]
+    contact: { email: "hanna.wallin@broninnovation.se", phone: +46 76 022 41 92 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: xlent-harriet-wikstrom
+    name: Harriet Wikström
+    title: VD XLENT Sundsvall / Senior partner XLENT
+    org: XLENT Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 36
+    competence: [business_development, consulting, it_leadership]
+    contact: { email: "harriet.wikstrom@xlent.se", phone: +46 70 674 17 90 }
+    sources:
+      - { url: "https://linkedin.com/in/harriet-wikstr%C3%B6m", type: linkedin_public }
+      - { url: https://www.xlent.se/kontor/sundsvall/, type: org_website }
+    confidence: high
+    notes: 36 år erfarenhet. Vice ordf. i XLENT Sundsvall AB.
+  - id: dtt-helena-carell
+    name: Helena Carell
+    title: "Head of Internationalisation & Compliance"
+    org: SSG (SecureLink Group)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    competence: [business_development, cybersecurity, it_leadership, risk]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/talare-2025, type: conference }
+      - { url: "https://se.linkedin.com/posts/hannawallinskan_visst-ses-vi-i-h%C3%B6st-activity-7336003260492713984-W9vI", type: linkedin_public }
+    confidence: medium
+  - id: sogeti-henrik-carlsson
+    name: Henrik Carlsson
+    title: "Team Manager, Sundsvall"
+    org: Sogeti Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, team_leadership]
+    contact: {}
+    sources:
+      - { url: https://www.sogeti.se/sundsvall/, type: org_website }
+    confidence: high
+  - id: azureug-hakan-silfvernagel
+    name: Håkan Silfvernagel
+    title: Grundare Azure User Group Sweden / Microsoft MVP (AI)
+    org: Azure User Group Sweden
+    org_type: community
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    competence: [ai, azure, cloud, devops, speaking]
+    contact: {}
+    sources:
+      - { url: https://www.meetup.com/azureusergroupsundsvallsverige/, type: community }
+    confidence: medium
+  - id: visionite-ida-stromgren
+    name: Ida Strömgren
+    title: VD Visionite AB
+    org: Visionite AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_central, consulting, erp, it_leadership, networks]
+    contact: { email: "ida.stromgren@visionite.se", phone: +46 72 050 39 94 }
+    sources:
+      - { url: https://visionite.se/vara-kontor/sundsvall/, type: org_website }
+    confidence: high
+    notes: Startade upp Sundsvallskontoret 2020. Drygt 50 seniora specialister.
+  - id: dtt-jakob-ehn
+    name: Jakob Ehn
+    title: "Talare GTC 2025 (LLM-assistenter, Azure OpenAI, RAG)"
+    org: (ej angiven)
+    org_type: unknown
+    location: Sundsvall
+    location_confidence: low
+    seniority: senior
+    competence: [ai, azure_openai, chatbot, llm, prompt_engineering, rag]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+    confidence: low
+  - id: notnot-jan-henrik-berggren
+    name: Jan Henrik Berggren
+    title: Styrelseledamot
+    org: Not Not Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, system_development]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/not-not-consulting-ab-559102-2255, type: public_record }
+    confidence: high
+  - id: gdm-jan-jutbo
+    name: Jan Jutbo
+    title: "Försäljning & Marknad"
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [business_development, sales]
+    contact: { email: "jan.jutbo@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: miu-jan-lundgren
+    name: Jan Lundgren
+    title: "Talare GTC 2025 (Workshop: Fortsätt din AI-resa)"
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [ai, teaching, workshop]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: gdm-janet-stahl
+    name: Janet Ståhl
+    title: "Kvalitet & Hållbarhet"
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [it_leadership, quality, sustainability]
+    contact: { email: "janet.stahl@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: kommun-jari-koponen
+    name: Jari Koponen
+    title: IT-strateg och programansvarig
+    org: Sundsvalls kommun
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [digital_transformation, it_strategy, program_management, public_sector_it]
+    contact: { email: "diggin@sundsvall.se" }
+    sources:
+      - { url: https://utveckling.sundsvall.se/att-jobba-hos-oss/vi-som-jobbar-har, type: org_website }
+    confidence: high
+    notes: "Kontaktadress diggin@sundsvall.se är avdelningens gemensamma adress."
+  - id: xlent-jenny-koch
+    name: Jenny Sofie Koch
+    title: Styrelsesuppleant XLENT Sundsvall AB
+    org: XLENT Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: unknown
+    competence: [business_development]
+    contact: {}
+    sources:
+      - { url: https://www.rating.se/info1/detail/people/5568782535, type: other }
+    confidence: medium
+  - id: milsvida-jens-altback
+    name: Jens Altbäck
+    title: VD
+    org: Milsvida AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, consulting, it_strategy]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/milsvida-ab/sundsvall/konsulter/2KHLMB8I5YF3I, type: public_record }
+    confidence: high
+    notes: VD sedan 2020. Äger även Jili AB och Drawit AB. Bolaget utvecklar IT-tjänster för skogsbranschen.
+  - id: itentre-jens-eriksson
+    name: Jens Eriksson
+    title: VD
+    org: IT-Entreprenörerna Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, consulting, it_strategy]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/it-entreprenorerna-sverige-ab-556840-1086, type: public_record }
+    confidence: high
+    notes: VD sedan 2011. Äger även Nordspiran AB och Nordspiran Invest AB.
+  - id: gtc-joakim-jardenberg
+    name: Joakim Jardenberg
+    title: "Keynotetalare GTC 2025 (\"Adopt a Hacker's Mindset\")"
+    org: Volvo Group
+    org_type: privat
+    location: okänd
+    location_confidence: low
+    seniority: senior
+    competence: [ai, developer_productivity, devtools, speaking]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+    confidence: medium
+  - id: knowit-joakim-jormelin
+    name: Joakim Jormelin
+    title: VD Knowit Experience Norrland AB
+    org: Knowit Experience Norrland AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting, digital_transformation, it_leadership]
+    contact: {}
+    sources:
+      - { url: https://www.knowit.se/business-portal/bolagslista/, type: org_website }
+    confidence: high
+  - id: coreit-johan-engvall
+    name: Johan Engvall
+    title: VD
+    org: CoreIT AB
+    org_type: privat
+    location: Örnsköldsvik
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, consulting, it_strategy]
+    contact: {}
+    sources:
+      - { url: "https://www.allabolag.se/befattningshavare/coreit-ab/domsj%C3%B6/konsulter/2K2LH5HI5YF3I", type: public_record }
+    confidence: high
+    notes: "VD sedan 2025-09-01. CoreIT ingår i Aderian Group-koncernen. Adress: Hörneborgsvägen 13, Domsjö."
+  - id: bron-johan-stenborg
+    name: Johan Stenborg
+    title: Projektledare
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [digital_transformation, project_management]
+    contact: { email: "johan.stenborg@broninnovation.se", phone: +46 73 335 93 55 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: gdm-johan-wangdahl
+    name: Johan Wängdahl
+    title: IT-Produktion
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [infrastructure, it_production, managed_it, operations]
+    contact: { email: "johan.wangdahl@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: dtt-johannes-linden
+    name: Johannes Lindén
+    title: AI-ingenjör
+    org: Kvadrat
+    org_type: privat
+    location: Sundsvall
+    location_confidence: low
+    seniority: mid
+    competence: [agentic_ai, ai, llm]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+    confidence: low
+  - id: golive-johnny-leijding
+    name: Johnny Leijding
+    title: Styrelseledamot
+    org: GoLive Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/golive-consulting-ab/sundsvall/konsulter/2K3FAQ6I5YF3I, type: public_record }
+    confidence: high
+  - id: azureug-jonah-andersson
+    name: Jonah Andersson
+    title: Grundare Azure User Group Sweden / Microsoft MVP (AI)
+    org: Eficode
+    org_type: privat
+    location: Sundsvall
+    location_confidence: low
+    seniority: senior
+    competence: [ai, app_development, azure, azure_openai, cloud, speaking]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/posts/jonahandersson_goodtechconference-azureai-sundsvall-activity-7385608216900009984-__b2, type: linkedin_public }
+      - { url: https://www.meetup.com/azureusergroupsundsvallsverige/, type: community }
+    confidence: medium
+    notes: 1 386 medlemmar i Azure-UG-gruppen. Talare GTC 2025. Arbetsgivare Eficode (verifiera ort).
+  - id: rvn-jonas-bylund
+    name: Jonas Bylund
+    title: Digitaliseringsdirektör
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: medium
+    seniority: cxo
+    competence: [digital_transformation, it_leadership, portfolio_management, public_sector_it]
+    contact: { email: "jonas.bylund@rvn.se", phone: +46 73 274 59 27 }
+    sources:
+      - { url: https://www.rvn.se/sv/Om-regionen/regionens-organisation/regionledningsforvaltningen/digitalisering/, type: org_website }
+      - { url: https://www.rvn.se/sv/Politik-och-insyn/Sa-styrs-regionen/regionledning/, type: org_website }
+    confidence: high
+  - id: sogeti-jonas-fjelling
+    name: Jonas Fjelling
+    title: "Branch Manager Mid (Borlänge, Gävle, Sundsvall)"
+    org: Sogeti Sverige AB
+    org_type: privat
+    location: Borlänge (troligen inte Sundsvall)
+    location_confidence: low
+    seniority: cxo
+    competence: [architecture, it_leadership, project_management, test_qa]
+    contact: {}
+    sources:
+      - { url: https://linkedin.com/in/jonas-fjelling-1635a836, type: linkedin_public }
+      - { url: https://www.sogeti.se/ledare-sundsvall/, type: org_website }
+    confidence: medium
+  - id: synetics-jonas-jerfsten
+    name: Jonas Jerfsten
+    title: Styrelseledamot
+    org: Synetics Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [backend, consulting, system_development]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/synetics-consulting-ab/sundsvall/konsulter/2K3C9X3I5YF3I, type: public_record }
+    confidence: high
+  - id: notnot-jonas-petersson
+    name: Jonas Petersson
+    title: Styrelseordförande
+    org: Not Not Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting, it_strategy, solution_architecture]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/not-not-consulting-ab-559102-2255, type: public_record }
+    confidence: high
+  - id: dtt-jonatan-stenmark
+    name: Jonatan Stenmark
+    title: Cyber Security Architect
+    org: Orange Cyberdefense Sweden AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    competence: [ai, cybersecurity, information_security, threat_intelligence]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+      - { url: https://goodtechconference.se/talare-2025, type: conference }
+    confidence: medium
+  - id: visionite-josefin-johansson
+    name: Josefin Johansson
+    title: Affärschef
+    org: Visionite AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [business_development, erp, sales]
+    contact: { email: "josefin.johansson@visionite.se", phone: +46 73 806 27 65 }
+    sources:
+      - { url: https://visionite.se/vara-kontor/sundsvall/, type: org_website }
+    confidence: high
+  - id: crestit-jorgen-berglund
+    name: Jörgen Berglund
+    title: Styrelseordförande
+    org: Crestit IT AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/crestit-it-ab/sundsvall/konsulter/2KHS4KLI5YF3I, type: public_record }
+    confidence: high
+  - id: itentre-jorgen-terner
+    name: Jörgen Terner
+    title: Styrelseordförande
+    org: IT-Entreprenörerna Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/it-entreprenorerna-sverige-ab-556840-1086, type: public_record }
+    confidence: high
+  - id: gdm-karin-ljusner
+    name: Karin Ljusner
+    title: HR-chef
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [hr, recruiting]
+    contact: { email: "karin.ljusner@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: miu-katarina-gidlund
+    name: Katarina Lindblad Gidlund
+    title: "Talare GTC 2025 (\"Vad är good tech?\")"
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [innovation, leadership, research]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: miu-kent-bertilsson
+    name: Kent Bertilsson
+    title: Talare GTC 2025 (Framtidens elnät)
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [energy_systems, research]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: synetics-kent-lundin
+    name: Kent Lundin
+    title: Styrelseordförande
+    org: Synetics Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting, it_strategy, system_development]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/synetics-consulting-ab/sundsvall/konsulter/2K3C9X3I5YF3I, type: public_record }
+    confidence: high
+    notes: Äger även Synetics Holding AB och Kalabra Systemutveckling AB.
+  - id: gdm-ketil-sletbakk
+    name: Ketil Sletbakk
+    title: "Ekonomi & HR"
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [finance, hr, it_leadership]
+    contact: { email: "ketil.sletbakk@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: gtc-klas-danerlov
+    name: Klas Danerlöv
+    title: Talare GTC 2025 (SustainGov)
+    org: SustainGov programkontor
+    org_type: offentlig
+    location: okänd
+    location_confidence: low
+    seniority: senior
+    competence: [digital_transformation, governance, public_sector_it]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: medium
+  - id: xlent-knut-olsson
+    name: Knut Anders Fredrik Olsson
+    title: Styrelseordförande (Bolagsverket-registrering) XLENT Sundsvall AB
+    org: XLENT Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: unknown
+    competence: [business_development]
+    contact: {}
+    sources:
+      - { url: https://www.rating.se/info1/detail/people/5568782535, type: other }
+    confidence: medium
+  - id: miu-kristin-aberg
+    name: Kristin Åberg
+    title: Talare GTC 2025
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    competence: [research, teaching]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/posts/good-tech-conference_gtc2025-goodtechconference-ai-activity-7381641462955974656-7Eyf, type: linkedin_public }
+    confidence: low
+  - id: miu-kyi-thar
+    name: Kyi Thar
+    title: Talare GTC 2025 (Cybersäkerhet inom industriell IoT)
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cybersecurity, iot, research, security]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: ocd-kare-nordstrom
+    name: Kåre Nordström
+    title: VD Orange Cyberdefense Sweden
+    org: Orange Cyberdefense Sweden AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: cxo
+    it_experience_years: 25
+    competence: [business_development, cybersecurity, it_leadership]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/kare-nordstrom, type: conference }
+      - { url: https://www.orangecyberdefense.com/se/insikter/blogg/orange-cyberdefense/nu-tar-orange-cyberdefense-steget-in-i-norra-sverige, type: org_website }
+    confidence: high
+    notes: "25 år i IT- och teknikbranschen. Ledande roller på TDC, Telenor och Cygate. Byggde Orange Cyberdefenses nordregion med bas i Sundsvall 2020. Utmärkelsen Årets ledare 2023 (Sundsvalls Business Awards). Sitter nu i bolagets huvudkontor i Stockholm."
+  - id: bron-lars-skandevall
+    name: Lars Persson Skandevall
+    title: VD/CEO Bron Innovation
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, cluster_leadership, digital_transformation, event_organisation, govtech]
+    contact: { email: "lars.skandevall@broninnovation.se", phone: +46 70 666 42 53 }
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+    notes: "Kontaktväg till hela klustret. Bron = ICT Cluster & Digital Innovation Hub, ~100 medlemmar."
+  - id: xlent-lina-hed
+    name: Lina Johanna Hed
+    title: Styrelseledamot XLENT Sundsvall AB
+    org: XLENT Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: unknown
+    competence: [business_development]
+    contact: {}
+    sources:
+      - { url: https://www.rating.se/info1/detail/people/5568782535, type: other }
+    confidence: medium
+  - id: portalplus-magdalena-bonde
+    name: Magdalena Bonde
+    title: Styrelseordförande
+    org: Portalplus AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, it_strategy]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566592316-Portalplus_AB, type: public_record }
+    confidence: high
+    notes: Ordförande sedan 2026-09-07. Är ordförande i Eniro Sverige Försäljning AB.
+  - id: swconn-magnus-krantz
+    name: Magnus Krantz
+    title: Styrelseledamot
+    org: Swedish Connection AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, networks]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566485677-Swedish_Connection_AB, type: public_record }
+    confidence: high
+  - id: dtt-maja-sigfeldt
+    name: Maja Sigfeldt
+    title: "Student/praktikant, medarrangör Dragon Tech Talk"
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: junior
+    competence: [community, event_organisation, student]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/posts/maja-sigfeldt_dragontechtalk-broninnovation-forestomni-activity-7437117644425580544-qfX6, type: linkedin_public }
+    confidence: high
+    notes: Praktikant hos Fredrik Linde. Tidig pipeline för examensjobb/praktik.
+  - id: bron-malin-thelin
+    name: Malin Thelin
+    title: Kommunikatör
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: mid
+    competence: [communication, event_organisation, marketing]
+    contact: { email: "malin.thelin@broninnovation.se", phone: +46 70 241 75 70 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: kommun-marcus-matteby
+    name: Marcus Matteby
+    title: Avdelningschef Digitalisering och IT / IT-direktör / CDO-CIO
+    org: Sundsvalls kommun
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [ai, digital_transformation, enterprise_architecture, it_leadership, public_sector_it]
+    contact: { email: "marcus.matteby@sundsvall.se", phone: +46 60 191 297 }
+    sources:
+      - { url: https://sundsvall.se/kommun/kommun-och-politik/kommunens-organisation/forvaltningar/kommunstyrelsekontoret, type: org_website }
+      - { url: https://utveckling.sundsvall.se/att-jobba-hos-oss/vi-som-jobbar-har, type: org_website }
+    confidence: high
+    notes: Bakom AI-verkstaden tillsammans med Skatteverket och Försäkringskassan.
+  - id: gdm-marcus-molin
+    name: Marcus Molin
+    title: Kundteamschef
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, customer_management]
+    contact: { email: "marcus.molin@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: rvn-marielle-hagstrom
+    name: Marielle Hagström
+    title: Enhetschef IT Användarstöd
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: low
+    seniority: lead
+    competence: [it_operations, it_support, public_sector_it, service_desk]
+    contact: {}
+    sources:
+      - { url: https://theorg.com/org/region-vasternorrland, type: other }
+    confidence: low
+  - id: kommun-markus-flyborg
+    name: Markus Flyborg
+    title: Lösningsarkitekt
+    org: Sundsvalls kommun
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [architecture, solution_architecture]
+    contact: {}
+    sources:
+      - { url: https://utveckling.sundsvall.se/att-jobba-hos-oss/vi-som-jobbar-har, type: org_website }
+    confidence: high
+  - id: rvn-markus-olsson
+    name: Markus Olsson
+    title: CIO / Head of IT
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: medium
+    seniority: cxo
+    competence: [enterprise_architecture, it_leadership, it_operations, public_sector_it, sap]
+    contact: {}
+    sources:
+      - { url: https://www.linkedin.com/in/markus-olsson76, type: linkedin_public }
+    confidence: high
+    notes: Ansvarar för IT till 3 sjukhus och 31 hälsocentrum. ~100 anställda i IT. Har suttit i Permobil Global Director IT.
+  - id: coreit-markus-spak
+    name: Markus Spak
+    title: Styrelseledamot
+    org: CoreIT AB
+    org_type: privat
+    location: Örnsköldsvik
+    location_confidence: high
+    seniority: senior
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.rating.se/info1/detail/people/5567249429, type: public_record }
+    confidence: high
+  - id: itentre-mats-egland
+    name: Mats Egland
+    title: Styrelseledamot och vice VD
+    org: IT-Entreprenörerna Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [business_development, consulting]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/it-entreprenorerna-sverige-ab-556840-1086, type: public_record }
+    confidence: high
+  - id: swconn-mattias-larsson
+    name: Mattias Larsson
+    title: Styrelseledamot
+    org: Swedish Connection AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, networks]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566485677-Swedish_Connection_AB, type: public_record }
+    confidence: high
+  - id: stc-mattias-onils
+    name: Mattias O’Nils
+    title: Professor och institutionschef
+    org: STC Forskningscenter (Mittuniversitetet)
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [leadership, machine_learning, research]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/mattias-onils, type: conference }
+    confidence: high
+    notes: Professor i datateknik och chef för STC Forskningscenter vid Mittuniversitetet.
+  - id: miu-mikael-gidlund
+    name: Mikael Gidlund
+    title: "Forskare, talare GTC 2025 (Cybersäkerhet inom industriell IoT)"
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cybersecurity, edge_computing, iot, research, security]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+    notes: Campus Sundsvall. Industriell IoT och cybersäkerhet.
+  - id: gdm-mikael-gustavsson
+    name: Mikael Gustavsson
+    title: Kundteamschef
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, customer_management]
+    contact: { email: "mikael.gustavsson@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: kommun-mikael-nordlander
+    name: Mikael Nordlander
+    title: Bitr. chef Digitalisering och IT / Chef IT Produktion
+    org: Sundsvalls kommun
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 25
+    competence: [cobit, enterprise_architecture, information_security, it_leadership, it_operations, itil, rpa, safe, toga]
+    contact: {}
+    sources:
+      - { url: https://www.linkedin.com/in/mikaelnordlander, type: linkedin_public }
+    confidence: high
+    notes: 25+ år inom IT. 100+ anställda i IT-organisationen. Servar även Ånge kommun.
+  - id: yrkesmastaren-mikael-nordlund
+    name: Mikael Nordlund
+    title: Kontaktperson / IT-konsult
+    org: Yrkesmästaren - IT-teknik i Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cloud, it_operations, it_support, m365, security]
+    contact: { email: "mikael.nordlund@yrkesmastaren.se", phone: +46 60 144 5 }
+    sources:
+      - { url: https://www.linkedin.com/company/yrkesmastaren, type: linkedin_public }
+    confidence: medium
+  - id: nordlo-niclas-norberg
+    name: Niclas Norberg
+    title: Delägare N62 IT Solutions
+    org: N62 IT Solutions (fd)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    competence: [infrastructure, networks]
+    contact: {}
+    sources:
+      - { url: "https://news.cision.com/se/nordlo/r/sundsvallsbolaget-n62-it-solutions-kops-upp-av-it-koncernen-nordlo-som-vaxer-i-norrland,c3963880", type: other }
+    confidence: medium
+  - id: gdm-niklas-hagberg
+    name: Niklas Hagberg
+    title: "AI & Innovation"
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [ai, consulting, innovation]
+    contact: { email: "niklas.hagberg@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: crestit-ola-holmgren
+    name: Ola Holmgren
+    title: VD
+    org: Crestit IT AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, consulting, it_strategy]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/crestit-it-ab/sundsvall/konsulter/2KHS4KLI5YF3I, type: public_record }
+    confidence: high
+    notes: Verkställande direktör sedan bolaget startade 2020.
+  - id: hockeyfy-olov-lovbom
+    name: Olov Lövbom
+    title: Grundare
+    org: Hockeyfy
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [ai, app_development]
+    contact: {}
+    sources:
+      - { url: https://www.st.nu/hockeyforetaget-tar-hjalp-av-elias-pettersson-for-att-etablera-sig-i-kanada/, type: press }
+    confidence: medium
+    notes: Grundare av Hockeyfy - AI-app som hjälper hockeyspelare träna skott via rörelseanalys i mobilen. Bolaget lanserades i Sverige 2025 och har expanderat till Kanada och Europa.
+  - id: syndis-patrik-jonasson
+    name: Patrik Jonasson
+    title: Extern vice VD
+    org: Syndis AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cybersecurity, information_security]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/syndis-ab-556915-8990, type: public_record }
+    confidence: high
+    notes: Extern vice VD sedan 2025-12-01. Verksam i Patrik Jonasson Security AB och Itsl Solutions AB.
+  - id: biometria-per-fahlen
+    name: Per Fahlén
+    title: Utvecklare
+    org: Biometria AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    it_experience_years: 20
+    competence: [community, gnss, web_development]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/per-fahlen, type: conference }
+      - { url: https://www.meetup.com/dragon-tech-talk/, type: community }
+    confidence: high
+    notes: Över 20 år i mjukvarubranschen. Initiativtagare till Dragon Tech Talk (Sundsvalls utvecklarcommunity) och moderator för utvecklarspåret på Good Tech Conference. Jobbar med teknik för skogsindustrin.
+  - id: arkaden-per-soderberg
+    name: Per Söderberg
+    title: Extern VD
+    org: Arkaden Konsult AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, consulting, it_strategy]
+    contact: {}
+    sources:
+      - { url: https://www.rating.se/info1/detail/people/5565631404, type: public_record }
+    confidence: high
+    notes: Extern VD sedan 2015. Äger även PeVa AB och Sluggo Holdingbolag AB (moderbolag).
+  - id: miu-peter-larsson
+    name: Peter Larsson
+    title: Talare GTC 2025 (Cybersäkerhet inom industriell IoT)
+    org: Orange Cyberdefense Sweden AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [cybersecurity, iot, penetration_testing, security]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: bron-petra-soderberg
+    name: Petra Söderberg
+    title: Projektledare
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [digital_transformation, it_leadership, project_management, quality, risk]
+    contact: { email: "petra.soderberg@broninnovation.se", phone: +46 72 993 53 63 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+      - { url: https://www.broninnovation.se/nyheter/valkommen-petra-soderberg, type: org_website }
+    confidence: high
+    notes: Tidigare kontors- och konsultchef på Sogeti. Uppvuxen i Sundsvall.
+  - id: portalplus-petter-quinsgaard
+    name: Petter Quinsgaard
+    title: Styrelseledamot
+    org: Portalplus AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, managed_it]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566592316-Portalplus_AB, type: public_record }
+    confidence: high
+  - id: swconn-pontus-johansson
+    name: Pontus Johansson
+    title: Styrelseledamot
+    org: Swedish Connection AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, networks]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566485677-Swedish_Connection_AB, type: public_record }
+    confidence: high
+  - id: arkaden-robert-soderberg
+    name: Robert Söderberg
+    title: Styrelseledamot
+    org: Arkaden Konsult AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/arkaden-konsult-ab-556563-1404, type: public_record }
+    confidence: high
+  - id: knowit-sandra-abremark
+    name: Sandra Abremark
+    title: Konsultchef
+    org: Knowit Norrland / Knowit Solutions Mitt
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, it_leadership, recruiting]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/posts/sandraabremark_weareknowit-knowitsolutions-activity-7368353813365145603-ARvz, type: linkedin_public }
+    confidence: medium
+    notes: Publicerar rekryteringar för Knowit Sundsvall - bra ingång för intern referral.
+  - id: gtc-sanna-grannas
+    name: Sanna Grannas
+    title: Moderator GTC 2025
+    org: Avoki
+    org_type: privat
+    location: okänd
+    location_confidence: low
+    seniority: senior
+    competence: [business_development, digital_transformation, leadership]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/program-utvecklarsparet, type: conference_program }
+    confidence: medium
+  - id: knowit-sara-ingvarsson
+    name: Sara Ingvarsson
+    title: (ej angiven på LinkedIn-post) - medverkade i webinar om AI-agenter
+    org: Knowit Solutions
+    org_type: privat
+    location: Sundsvall
+    location_confidence: low
+    seniority: senior
+    competence: [agentic_ai, ai, devops]
+    contact: {}
+    sources:
+      - { url: https://se.linkedin.com/showcase/knowit-solutions/, type: linkedin_public }
+    confidence: low
+  - id: rvn-sara-killander
+    name: Sara Killander
+    title: Enhetschef systemförvaltning kärnverksamhet
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    it_experience_years: 21
+    competence: [ehealth, healthcare_it, public_sector_it, system_management, team_leadership]
+    contact: {}
+    sources:
+      - { url: https://www.linkedin.com/in/sara-killander-6a29413b, type: linkedin_public }
+    confidence: high
+    notes: 21 år erfarenhet. Leder 22 objektspecialister.
+  - id: stc-sebastian-bader
+    name: Sebastian Bader
+    title: Forskare
+    org: STC Forskningscenter (Mittuniversitetet)
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [iot, machine_learning, research]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/sebastian-bader, type: conference }
+    confidence: high
+    notes: "Forskar om nästa generations industriell IoT inom datadriven utveckling, IoT och AI."
+  - id: rvn-sofia-naslund
+    name: Sofia Näslund
+    title: IT Teamledare Test
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: low
+    seniority: lead
+    competence: [test_leadership, test_qa]
+    contact: {}
+    sources:
+      - { url: https://theorg.com/org/region-vasternorrland, type: other }
+    confidence: low
+  - id: miu-stefan-forsstrom
+    name: Stefan Forsström
+    title: Talare GTC 2025 (AI-verktyg för produktivitet)
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [ai, research, teaching]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: swconn-susanne-larsson-bystrom
+    name: Susanne Larsson Byström
+    title: VD och styrelseordförande
+    org: Swedish Connection AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, it_strategy, managed_it]
+    contact: {}
+    sources:
+      - { url: https://www.bolagsfakta.se/5566485677-Swedish_Connection_AB, type: public_record }
+    confidence: high
+    notes: "Verklig huvudman. Koncernmoder: Swedish Connection Group AB. Bolaget gör bredband, övervakning och IT-konsulting."
+  - id: sleipner-sverker-svardby
+    name: Sverker Svärdby
+    title: Grundare och VD
+    org: Sleipner Robotics AB
+    org_type: privat
+    location: Örnsköldsvik
+    location_confidence: high
+    seniority: cxo
+    competence: [business_development, iot, machine_learning]
+    contact: {}
+    sources:
+      - { url: https://bizmaker.se/sleipner-robotics/, type: press }
+    confidence: high
+    notes: "Grundade Sleipner Robotics 2024. Utvecklar obemannade markfordon för gruv, skog och räddningsinsatser. Baserad i Domsjö, Västernorrland."
+  - id: propro-teodor-wickman
+    name: Teodor Wickman
+    title: Managementkonsult
+    org: "Pro&Pro"
+    org_type: privat
+    location: Sundsvall
+    location_confidence: medium
+    seniority: senior
+    competence: [business_development, consulting, digital_strategy]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/teodor-wickman, type: conference }
+    confidence: high
+    notes: Arbetar med digitalisering och regional utveckling. Presenterade studie på uppdrag av Mittuniversitetet om datacenteretableringar i Västernorrland.
+  - id: sogeti-thomas-boden
+    name: Thomas Bodén
+    title: "Account Executive, Sundsvall"
+    org: Sogeti Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: mid
+    competence: [customer_management, sales]
+    contact: {}
+    sources:
+      - { url: https://www.sogeti.se/kontakt/, type: org_website }
+    confidence: high
+  - id: nordlo-thomas-nordin
+    name: Thomas Nordin
+    title: VD Nordlo Sundsvall (fd N62 IT Solutions)
+    org: Nordlo Sundsvall AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 37
+    competence: [infrastructure, it_leadership, it_operations, networks, wan]
+    contact: { email: "thomas.nordin@nordlo.com", phone: +46 70 606 78 70 }
+    sources:
+      - { url: https://linkedin.com/in/nordinthomas, type: linkedin_public }
+      - { url: https://nordlo.com/kontor/sundsvall, type: org_website }
+      - { url: https://www.bolagsfakta.se/5567896252-Nordlo_Sundsvall_AB, type: other }
+    confidence: high
+    notes: 37 år erfarenhet. Grundade N62 2009. VD-post sedan 2024.
+  - id: fostira-thomas-aslin
+    name: Thomas Åslin
+    title: Styrelseledamot
+    org: "Fostira Webb & Consulting AB"
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [ai, consulting, web_development]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/fostira-webb-consulting-ab-559463-5004, type: public_record }
+    confidence: high
+  - id: bron-tilde-granrud
+    name: Tilde Granrud
+    title: Kommunikatör
+    org: Bron Innovation AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: mid
+    competence: [communication, event_organisation, marketing]
+    contact: { email: "tilde.granrud@broninnovation.se", phone: +46 70 766 01 49 }
+    sources:
+      - { url: https://www.broninnovation.se/kontakta-oss, type: org_website }
+    confidence: high
+  - id: knowit-tobias-bergman
+    name: Tobias Bergman
+    title: "Head of Business, Knowit Experience Norrland"
+    org: Knowit Experience Norrland AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    it_experience_years: 25
+    competence: [customer_management, dotnet, it_leadership, project_management]
+    contact: {}
+    sources:
+      - { url: https://www.linkedin.com/in/tobiasbergman, type: linkedin_public }
+    confidence: high
+    notes: 25 år erfarenhet. Teamleader för .NET-utvecklare 2011-2017.
+  - id: fostira-tom-pripp
+    name: Tom Pripp
+    title: Styrelseledamot
+    org: "Fostira Webb & Consulting AB"
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [consulting, web_development]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/fostira-webb-consulting-ab-559463-5004, type: public_record }
+    confidence: high
+  - id: gdm-tomas-aberg
+    name: Tomas Åberg
+    title: Kundteam
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: lead
+    competence: [consulting, customer_management]
+    contact: { email: "tomas.aberg@gdm.se" }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+    confidence: high
+  - id: synetics-tommy-fjellstrom
+    name: Tommy Fjellström
+    title: Styrelseledamot
+    org: Synetics Consulting AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [backend, consulting, system_development]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/synetics-consulting-ab/sundsvall/konsulter/2K3C9X3I5YF3I, type: public_record }
+    confidence: high
+  - id: gdm-tommy-gustafsson
+    name: Tommy Gustafsson
+    title: "Grundare & VD (nu Strategisk rådgivare)"
+    org: Aderian GDM (fd GDM Konsult AB)
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 30
+    competence: [business_development, it_leadership, it_strategy, managed_it]
+    contact: { email: "tommy.gustafsson@gdm.se", phone: +46 70 334 79 96 }
+    sources:
+      - { url: https://gdm.se/om-oss/ledning, type: org_website }
+      - { url: https://www.linkedin.com/in/tommy-gustafsson-016aa42, type: linkedin_public }
+    confidence: high
+    notes: "Grundade bolaget 1992, 30+ år i IT. Aderian Group-koncernen."
+  - id: gtc25-tony-mc-carrick
+    name: Tony Mc Carrick
+    title: Strategisk rådgivare inom AI
+    org: Atea Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: low
+    seniority: senior
+    competence: [ai, consulting, digital_strategy, public_sector_it]
+    contact: {}
+    sources:
+      - { url: https://goodtechconference.se/talare-2025, type: conference }
+    confidence: medium
+    notes: "Bakgrund som lärare och skolledare, cirka 15 år med digitaliseringsfrågor inom kommunsektorn. Talare GTC 2025 om Twin Transition. Atea har kontor i Sundsvall - personens egen ort är inte belagd."
+  - id: sdk-ulf-krutrok
+    name: Ulf Krutrök
+    title: Styrelseordförande
+    org: Sundsvalls Datakonsulter SDK AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting]
+    contact: {}
+    sources:
+      - { url: https://www.alltombolag.se/foretag/sundsvalls-datakonsulter-sdk-ab-556613-5512, type: public_record }
+    confidence: high
+  - id: sogeti-veronica-lofberg
+    name: Veronica Löfberg
+    title: Ansvarig för Sundsvallsregionen (fd Regionchef Norr)
+    org: Sogeti Sverige AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    it_experience_years: 18
+    competence: [it_leadership, it_operations, project_management, test_qa]
+    contact: {}
+    sources:
+      - { url: "https://news.cision.com/se/sogeti-sverige-ab/r/veronica-lofberg-ny-regionchef-pa-sogeti,c3266196", type: other }
+      - { url: https://www.sogeti.se/sundsvall/, type: org_website }
+    confidence: high
+    notes: Tidigare CGI-konsultchef Sundsvall/Härnösand. 18 år på Sogeti.
+  - id: miu-viktor-dohlen
+    name: Viktor Döhlen
+    title: Talare GTC 2025 (Framtidens elnät)
+    org: Mittuniversitetet
+    org_type: akademi
+    location: Sundsvall
+    location_confidence: high
+    seniority: senior
+    competence: [energy_systems, iot, research]
+    contact: {}
+    sources:
+      - { url: https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/, type: other }
+    confidence: high
+  - id: hockeyfy-william-sonesson
+    name: William Sonesson
+    title: Grundare
+    org: Hockeyfy
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [ai, app_development]
+    contact: {}
+    sources:
+      - { url: https://www.st.nu/hockeyforetaget-tar-hjalp-av-elias-pettersson-for-att-etablera-sig-i-kanada/, type: press }
+    confidence: medium
+    notes: Grundare av Hockeyfy tillsammans med Olov Lövbom.
+  - id: rvn-zeth-borg
+    name: Zeth Borg
+    title: "Enhetschef, Enheten för IT Vårdtjänster"
+    org: Region Västernorrland
+    org_type: offentlig
+    location: Sundsvall
+    location_confidence: low
+    seniority: lead
+    competence: [healthcare_it, it_leadership, public_sector_it]
+    contact: {}
+    sources:
+      - { url: https://theorg.com/org/region-vasternorrland, type: other }
+    confidence: low
+  - id: sdk-asa-osterberg
+    name: Åsa Österberg
+    title: VD
+    org: Sundsvalls Datakonsulter SDK AB
+    org_type: privat
+    location: Sundsvall
+    location_confidence: high
+    seniority: cxo
+    competence: [consulting, it_strategy, managed_it]
+    contact: {}
+    sources:
+      - { url: https://www.allabolag.se/foretag/sundsvalls-datakonsulter-sdk-ab/sundsvall/konsulter/2K1XLNCI5YF3I, type: public_record }
+    confidence: high
+    notes: VD sedan 2012.
+
+employers_to_work:
+  - {
+      org: Koneo AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: false,
+      named_count: 0,
+      sector: retail_it,
+      note: Butiks-IT och butikssystem,
+    }
+  - {
+      org: Retail Data Sundsvall AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 1,
+      named_people: [Andreas Linnsén],
+      sector: retail_it,
+    }
+  - {
+      org: Portalplus AB,
+      employees: 19,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [David Jonsson, Magdalena Bonde, Petter Quinsgaard],
+      sector: web,
+    }
+  - {
+      org: Crestit IT AB,
+      employees: 11,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 4,
+      named_people: [Andreas Öhman, Christer Abrahamsson, Jörgen Berglund, Ola Holmgren],
+      sector: it_consulting,
+    }
+  - {
+      org: Swedish Connection AB,
+      employees: 12,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 5,
+      named_people: [Anders Niklas Lord, Magnus Krantz, Mattias Larsson, Pontus Johansson, Susanne Larsson Byström],
+      sector: it_consulting,
+    }
+  - {
+      org: Synetics Consulting AB,
+      employees: 7,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 4,
+      named_people: [David Wiklund, Jonas Jerfsten, Kent Lundin, Tommy Fjellström],
+      sector: it_consulting,
+    }
+  - {
+      org: Milsvida AB,
+      employees: 5,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 2,
+      named_people: [Daniel Kjellqvist, Jens Altbäck],
+      sector: it_consulting,
+    }
+  - {
+      org: Arkaden Konsult AB,
+      employees: 9,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [Gert Söderberg, Per Söderberg, Robert Söderberg],
+      sector: it_consulting,
+    }
+  - {
+      org: Syndis AB,
+      employees: 6,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [Anton Már Egilsson, Guðjón Ingi Ágústsson, Patrik Jonasson],
+      sector: it_consulting,
+    }
+  - {
+      org: IT-Entreprenörerna Sverige AB,
+      employees: 6,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [Jens Eriksson, Jörgen Terner, Mats Egland],
+      sector: it_consulting,
+    }
+  - {
+      org: A3 IT AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: Agilis IT Konsult AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 1,
+      named_people: [Anders Sjöberg],
+      sector: it_consulting,
+    }
+  - {
+      org: Software Dynamics IT-Konsult AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 1,
+      named_people: [Andreas Pousette],
+      sector: it_consulting,
+    }
+  - {
+      org: Not Not Consulting AB,
+      employees: 6,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [Bobo Häggström, Jan Henrik Berggren, Jonas Petersson],
+      sector: it_consulting,
+    }
+  - {
+      org: "Fostira Webb & Consulting AB",
+      employees: 8,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 4,
+      named_people: [Alexander Möllersen, Edwin Dellkrans, Thomas Åslin, Tom Pripp],
+      sector: web_development,
+    }
+  - {
+      org: Amplifyit Sverige AB,
+      employees: 2,
+      site: Kvissleby,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: GoLive Consulting AB,
+      employees: 1,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 1,
+      named_people: [Johnny Leijding],
+      sector: it_consulting,
+    }
+  - {
+      org: Sundsvalls Datakonsulter SDK AB,
+      employees: 5,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 2,
+      named_people: [Ulf Krutrök, Åsa Österberg],
+      sector: it_consulting,
+    }
+  - {
+      org: Nordlo Sundsvall AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 2,
+      named_people: [David Sandgren, Thomas Nordin],
+      sector: nu Nordlo - se ovan,
+      note: fd N62 IT Solutions AB - Nordlo-gruppen,
+    }
+  - {
+      org: Why IT Solutions i Sundsvall AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: "Sundsvalls It & Automation AB",
+      employees: 0,
+      site: Alnö,
+      named_leadership: false,
+      named_count: 0,
+      sector: automation,
+    }
+  - {
+      org: Arcus / StjärnaFyrkant Sundsvall,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: Atea Sverige AB,
+      employees: 0,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 1,
+      named_people: [Tony Mc Carrick],
+      sector: it_reseller,
+    }
+  - {
+      org: IBM Svenska AB,
+      employees: 0,
+      site: Storgatan 42,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: Sigma Technology Information AB (Softronic),
+      employees: 0,
+      site: Storgatan 73 / Varvsgränd 8,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+      note: StorSigma-kontor + Sigmateknikern-programmet,
+    }
+  - {
+      org: Orange Cyberdefense Sweden AB,
+      employees: 0,
+      site: Skepparegatan 5 A,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [Jonatan Stenmark, Kåre Nordström, Peter Larsson],
+      sector: security,
+    }
+  - {
+      org: Telia Cygate AB,
+      employees: 10,
+      site: Sundsvall,
+      named_leadership: true,
+      named_count: 2,
+      named_people: [Christian Holmstedt, Daniel Stegeby],
+      sector: networking,
+    }
+  - {
+      org: CoreIT AB,
+      employees: 103,
+      site: Örnsköldsvik,
+      named_leadership: true,
+      named_count: 3,
+      named_people: [Christian Dempe, Johan Engvall, Markus Spak],
+      sector: it_consulting,
+      note: Största enskilda IT-poolen i regionen,
+    }
+  - {
+      org: Flexite AB,
+      employees: 13,
+      site: Örnsköldsvik,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: Websystem i Örnsköldsvik AB,
+      employees: 8,
+      site: Örnsköldsvik,
+      named_leadership: false,
+      named_count: 0,
+      sector: web_development,
+    }
+  - {
+      org: Add Cream AB,
+      employees: 5,
+      site: Örnsköldsvik,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: Soulmate Sundsvall Wideside AB,
+      employees: 2,
+      site: Sundsvall,
+      named_leadership: false,
+      named_count: 0,
+      sector: software,
+    }
+  - {
+      org: Syscraft AB,
+      employees: 12,
+      site: Kovland,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: BluePix AB,
+      employees: 3,
+      site: Alnö,
+      named_leadership: false,
+      named_count: 0,
+      sector: software,
+    }
+  - {
+      org: Norit Sweden AB,
+      employees: 4,
+      site: Sörberge,
+      named_leadership: false,
+      named_count: 0,
+      sector: it_consulting,
+    }
+  - {
+      org: Intelligent Drivers Hour Analyzer (IDHA) Sweden AB,
+      employees: 9,
+      site: Sundsvall,
+      named_leadership: false,
+      named_count: 0,
+      sector: analytics,
+    }
+
+sources:
+  - {
+      url: "https://gdm.se/om-oss/ledning",
+      type: org_website,
+      used_for: "Aderian GDM ledning",
+    }
+  - {
+      url: "https://www.knowit.se/business-portal/bolagslista/",
+      type: org_website,
+      used_for: "Knowit bolag/VD",
+    }
+  - {
+      url: "https://www.knowit.se/kontakt/sundsvall/",
+      type: org_website,
+      used_for: "Knowit Sundsvall kontakt",
+    }
+  - {
+      url: "https://www.xlent.se/kontor/sundsvall/",
+      type: org_website,
+      used_for: "XLENT Sundsvall kontakt",
+    }
+  - {
+      url: "https://visionite.se/vara-kontor/sundsvall/",
+      type: org_website,
+      used_for: "Visionite Sundsvall kontakt",
+    }
+  - {
+      url: "https://www.sogeti.se/sundsvall/",
+      type: org_website,
+      used_for: "Sogeti Sundsvall ledning",
+    }
+  - {
+      url: "https://www.sogeti.se/ledare-sundsvall/",
+      type: org_website,
+      used_for: "Sogeti ledare",
+    }
+  - {
+      url: "https://nordlo.com/kontor/sundsvall",
+      type: org_website,
+      used_for: "Nordlo Sundsvall kontakt",
+    }
+  - {
+      url: "https://www.broninnovation.se/kontakta-oss",
+      type: org_website,
+      used_for: "Bron Innovation team",
+    }
+  - {
+      url: "https://sundsvall.se/kommun/kommun-och-politik/kommunens-organisation/forvaltningar/kommunstyrelsekontoret",
+      type: org_website,
+      used_for: "Sundsvalls kommun IT-ledning",
+    }
+  - {
+      url: "https://utveckling.sundsvall.se/att-jobba-hos-oss/vi-som-jobbar-har",
+      type: org_website,
+      used_for: "Sundsvalls kommun Digitalisering och IT - presentation",
+    }
+  - {
+      url: "https://www.rvn.se/sv/Om-regionen/regionens-organisation/regionledningsforvaltningen/digitalisering/",
+      type: org_website,
+      used_for: "Region Västernorrland digitalisering",
+    }
+  - {
+      url: "https://www.rvn.se/sv/Politik-och-insyn/Sa-styrs-regionen/regionledning/",
+      type: org_website,
+      used_for: "Region Västernorrland regionledning",
+    }
+  - {
+      url: "https://goodtechconference.se/program-utvecklarsparet",
+      type: conference_program,
+      used_for: "GTC talare 2025",
+    }
+  - {
+      url: "https://www.miun.se/Forskning/forskningscentra/sensible-things-that-communicate/events-seminarier/calendar/2025-10/Konferens-om-bra-teknik/",
+      type: conference_program,
+      used_for: "Mittuniversitetet talare",
+    }
+  - {
+      url: "https://www.meetup.com/dragon-tech-talk/",
+      type: community,
+      used_for: "Dragon Tech Talk",
+    }
+  - {
+      url: "https://www.meetup.com/azureusergroupsundsvallsverige/",
+      type: community,
+      used_for: "Azure User Group Sweden",
+    }
+  - {
+      url: "https://theorg.com/org/region-vasternorrland",
+      type: aggregator_theorg,
+      used_for: "Region Västernorrland IT-orgschema",
+    }
+  - {
+      url: "https://letabolag.se/bransch/datakonsultverksamhet/vasternorrlands",
+      type: registry,
+      used_for: "Antal anställda per bolag",
+    }
+  - {
+      url: "https://www.scb.se/vara-tjanster/bestall-data-och-statistik/foretagsregistret/avgiftsfria-uppgifter-i-foretagsregistret/",
+      type: registry,
+      used_for: "SCB API - företag/myndigheter, gratis",
+    }
+  - {
+      url: "https://myndighetsregistret.scb.se/",
+      type: registry,
+      used_for: "Statliga myndigheters register",
+    }
+  - {
+      url: "https://arbetsformedlingen.se/for-arbetsgivare/rekrytera/sok-kandidater",
+      type: official_service,
+      used_for: "Arbetsförmedlingens kandidatbank (gratis)",
+    }
+
+  - {
+      url: "https://www.allabolag.se/foretag/crestit-it-ab/sundsvall/konsulter/2KHS4KLI5YF3I",
+      type: public_record,
+      used_for: "Crestit IT AB ledning",
+    }
+  - {
+      url: "https://www.bolagsfakta.se/5566485677-Swedish_Connection_AB",
+      type: public_record,
+      used_for: "Swedish Connection AB ledning",
+    }
+  - {
+      url: "https://www.rating.se/info1/detail/people/5565631404",
+      type: public_record,
+      used_for: "Arkaden Konsult AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/synetics-consulting-ab/sundsvall/konsulter/2K3C9X3I5YF3I",
+      type: public_record,
+      used_for: "Synetics Consulting AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/syndis-ab/sundsvall/konsulter/2K3QEKUI5YF3I",
+      type: public_record,
+      used_for: "Syndis AB ledning",
+    }
+  - {
+      url: "https://www.alltombolag.se/foretag/it-entreprenorerna-sverige-ab-556840-1086",
+      type: public_record,
+      used_for: "IT-Entreprenörerna Sverige AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/fostira-webb-consulting-ab/sundsvall/konsulter/2KIWFZWI5YF3I",
+      type: public_record,
+      used_for: "Fostira Webb & Consulting AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/sundsvalls-datakonsulter-sdk-ab/sundsvall/konsulter/2K1XLNCI5YF3I",
+      type: public_record,
+      used_for: "Sundsvalls Datakonsulter SDK AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/milsvida-ab/sundsvall/konsulter/2KHLMB8I5YF3I",
+      type: public_record,
+      used_for: "Milsvida AB ledning",
+    }
+  - {
+      url: "https://www.alltombolag.se/foretag/not-not-consulting-ab-559102-2255",
+      type: public_record,
+      used_for: "Not Not Consulting AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/befattningshavare/coreit-ab/domsj%C3%B6/konsulter/2K2LH5HI5YF3I",
+      type: public_record,
+      used_for: "CoreIT AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/befattningshavare/agilis-it-konsult-ab/sundsvall/konsulter/2K2EP9EI5YF3I",
+      type: public_record,
+      used_for: "Agilis IT konsult AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/software-dynamics-it-konsult-ab/sundsvall/konsulter/2K3F6YJI5YF3I",
+      type: public_record,
+      used_for: "Software Dynamics IT-Konsult AB ledning",
+    }
+  - {
+      url: "https://www.alltombolag.se/foretag/retail-data-sundsvall-ab-556772-0619",
+      type: public_record,
+      used_for: "Retail Data Sundsvall AB ledning",
+    }
+  - {
+      url: "https://www.allabolag.se/foretag/golive-consulting-ab/sundsvall/konsulter/2K3FAQ6I5YF3I",
+      type: public_record,
+      used_for: "goLive Consulting AB ledning",
+    }
+  - {
+      url: "https://www.bolagsfakta.se/5566592316-Portalplus_AB",
+      type: public_record,
+      used_for: "Portalplus AB ledning",
+    }
+  - {
+      url: "https://goodtechconference.se/talare",
+      type: conference,
+      used_for: "GTC 2026 talare",
+    }
+  - {
+      url: "https://goodtechconference.se/kare-nordstrom",
+      type: conference,
+      used_for: "Kåre Nordström bio GTC 2026",
+    }
+  - {
+      url: "https://goodtechconference.se/christian-holmstedt",
+      type: conference,
+      used_for: "Christian Holmstedt bio GTC 2026",
+    }
+  - {
+      url: "https://goodtechconference.se/per-fahlen",
+      type: conference,
+      used_for: "Per Fahlén bio GTC 2026",
+    }
+  - {
+      url: "https://goodtechconference.se/sebastian-bader",
+      type: conference,
+      used_for: "Sebastian Bader bio GTC 2026",
+    }
+  - {
+      url: "https://goodtechconference.se/mattias-onils",
+      type: conference,
+      used_for: "Mattias O'Nils bio GTC 2026",
+    }
+  - {
+      url: "https://goodtechconference.se/teodor-wickman",
+      type: conference,
+      used_for: "Teodor Wickman bio GTC 2026",
+    }
+  - {
+      url: "https://www.st.nu/hockeyforetaget-tar-hjalp-av-elias-pettersson-for-att-etablera-sig-i-kanada/",
+      type: press,
+      used_for: "Hockeyfy grundare",
+    }
+  - {
+      url: "https://bizmaker.se/sleipner-robotics/",
+      type: press,
+      used_for: "Sleipner Robotics grundare",
+    }
+
+# ============================================================================
+# KOMPETENS-TAXONOMI (normaliserade taggar)
+# ============================================================================
+# ============================================================================
+# KOMPETENS-TAXONOMI (normaliserade taggar)
+#
+# Ordlisten är källa: taggar som tas bort här rensas vid import, och
+# taggar som läggs till här får kategori automatiskt.
+# ============================================================================
+competence_taxonomy:
+  languages:
+    [dotnet, java, javascript_typescript, python, go, kotlin, swift, php, webassembly]
+  frontend:
+    [web_development, react, angular, vue, css, ux, ui_design, app_development]
+  backend:
+    [api, microservices, system_development, backend, graphql, rest, event_driven]
+  data:
+    [data_engineering, bi, sql, analytics, machine_learning, ai, llm, agentic_ai, kafka, chatbot, prompt_engineering, rag]
+  cloud_platform:
+    [azure, aws, gcp, cloud, azure_openai, kubernetes, containers, edge_computing, networks, wan]
+  devops:
+    [devops, ci_cd, github_copilot, devsecops, infrastructure, it_operations, automation, rpa, cluster_leadership, developer_productivity, devtools, it_production, operations, system_management]
+  security:
+    [cybersecurity, information_security, security, identity, oauth, oidc, penetration_testing, threat_intelligence, ai_security, secure_development]
+  enterprise:
+    [enterprise_architecture, solution_architecture, architecture, it_strategy, it_leadership, governance, cobit, toga, itil, safe]
+  delivery:
+    [project_management, program_management, portfolio_management, scrum, agile, test_qa, test_leadership, it_support, service_desk, technical_delivery, service_design]
+  business:
+    [it_sales, business_development, customer_management, consulting, recruiting, employer_branding, hr, quality, risk, finance, marketing, communication, digital_strategy, sales]
+  domain:
+    [erp, business_central, sap, m365, iot, gnss, energy_systems, healthcare_it, ehealth, public_sector_it, govtech, digital_transformation, retail_it, data_workshop, managed_it]
+  meta:
+    [speaking, event_organisation, community, networking, student, research, teaching, workshop, team_leadership, sustainability, coaching, innovation, leadership]
+
+# ============================================================================
+# NÄSTA STEG - rekryteringsinsatser
+# ============================================================================
+next_steps:
+  - id: 1
+    action: "Bemannings-CV: be om CV-lista från Wise IT, Veritaz, Amendo, Rutinera, OnePartnerGroup, Uniflex, Poolia"
+    why: "Största lokala CV-poolen, konsensbaserad, gratis eller låg kostnad"
+    effort: "1 vecka"
+  - id: 2
+    action: "Aktivera Arbetsförmedlingens 'Sök kandidater' (kandidatbank)"
+    why: "Gratis, samtyckesbaserad, nationell täckning"
+    effort: "1 dag"
+  - id: 3
+    action: "LinkedIn-sökning per arbetsgivare i employers_to_work för de 16 bolag som fortfarande saknar namngiven ledning"
+    why: "Skapar den 'alla anställda'-bild som webben inte ger direkt"
+    effort: "3-5 dagar"
+  - id: 4
+    action: "Bli medlem i Bron Innovation + sponsor Dragon Tech Talk / Azure UG"
+    why: "Nätverk, inte kallkontakt - ger 20-40 lokala utvecklare i ett rum"
+    effort: "2-4 veckor"
+  - id: 5
+    action: "Verka för att små lokala IT-konsultfirmor (Portalplus, Crestit, Synetics, Arkaden, Fostira, Not Not, Syndis) får fler uppdrag"
+    why: "Deras styrelse-ledning är nu namngiven - de är 10-20 personer per bolag och växer med sina kunder"
+    effort: "löpande"
+  - id: 6
+    action: "Följ upp Good Tech Conference 2027 och övriga lokala evenemang (Dragon Tech Talk, Azure UG, Säkerhet i Norrland)"
+    why: "Årets talarlista har gett 40+ nya namn; mönstret upprepas varje år"
+    effort: "1 vecka per tillfälle"
+  - id: 7
+    action: "Kontakta de 4 personer med dokumenterad anställningstid direkt (Tommy Gustafsson, Thomas Nordin, Tobias Bergman, Kåre Nordström)"
+    why: "Några har redan visat senioritet i offentliga källor - de är billigare att värva"
+    effort: "1 dag"
+  - id: 8
+    action: "Bygg kundkonfliktkontroll: kandidatens nuvarande arbetsgivare vs kundens leverantörer"
+    why: "Konsult som jobbat med kunden i tre år är inte tillgänglig - det är ett verkligt hinder"
+    effort: "1 vecka"
+  - id: 9
+    action: "Fyll anställningshistorik för de ~30 personer som faktiskt ska kontaktas"
+    why: "Anställningshistorik är det som skiljer verklig erfarenhet från uppskattning; utan den filtreras personer på gissning"
+    effort: "2-3 veckor"
+
+# ============================================================================
+# NOTER OM METOD OCH DATAKVALITET
+# ============================================================================
+notes:
+  - "Källor: org_website, linkedin_public, conference, conference_program, community, press, public_record. Varje person ska ha minst en källa."
+  - "public_record = offentligt bolagsregister (Bolagsverket). Ger styrelse och VD, alltså personer som faktiskt bestämmer i mindre IT-bolag."
+  - "Bolagsregister ger INNEHÅLL i bolaget, inte en yrkestitel. Kompetensmarkeringen är därför en hypotes om vad bolaget gör."
+  - "it_experience_years skrivs bara ut när värdet är explicit källbelagt. Annars härleds det av importen (notes -> rollnivå) och grundens sparas i it_experience_basis."
+  - "Anställningshistorik ligger i data/employment-history.yaml - se db/import_from_yaml.py för hur den adopterar och räknar om intervall."
+  - "Dubbletter: importen hittar dubbletter med fn_find_duplicates (trigramlikhet). Granska listan som skrivs ut efter varje körning."
+  - "Filen är gitignorerad? Nej - data/ versionshålls, men db/backups/ (databasdumpar med personuppgifter) är gitignoreras."
