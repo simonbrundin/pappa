@@ -8,6 +8,7 @@ import (
 
 	"github.com/emersion/go-imap"
 	imapclient "github.com/emersion/go-imap/client"
+	"golang.org/x/text/unicode/norm"
 
 	"mailagent/config"
 	"mailagent/rules"
@@ -94,7 +95,9 @@ func (c *Client) ListFolders() ([]string, error) {
 
 	var folders []string
 	for m := range mailboxes {
-		folders = append(folders, m.Name)
+		// Return NFC so names are readable and stable for callers; the
+		// server side form is restored in getFolderName.
+		folders = append(folders, norm.NFC.String(m.Name))
 	}
 
 	if err := <-done; err != nil {
@@ -121,13 +124,18 @@ func (c *Client) CountEmails(folder string) (total int64, unread int64, err erro
 // getFolderName returns the IMAP folder name. A shared mailbox is selected
 // through the XOAUTH2 identity, not by prefixing the folder name.
 // On one.com, all folders live under INBOX.* namespace.
+//
+// Folder names are normalised to NFD before they are sent to the server.
+// one.com stores mailbox names in decomposed form (A + U+030A instead of
+// U+00C5), so an NFC name is not found by the server. Normalising here makes
+// callers independent of which form they hold the name in.
 func (c *Client) getFolderName(folder string) string {
 	// one.com uses INBOX.* namespace - if folder doesn't start with INBOX,
 	// assume it's a top-level folder and prefix it
 	if !strings.HasPrefix(folder, "INBOX") && c.cfg.Server == "imap.one.com" {
-		return "INBOX." + folder
+		folder = "INBOX." + folder
 	}
-	return folder
+	return norm.NFD.String(folder)
 }
 
 // ListEmails retrieves emails from a folder
@@ -218,7 +226,7 @@ func (c *Client) ReadEmail(folder string, uid uint32) (*rules.EmailContext, erro
 		imap.FetchEnvelope,
 		imap.FetchBodyStructure,
 		imap.FetchFlags,
-		imap.FetchItem("BODY[TEXT]"),
+		imap.FetchItem("BODY.PEEK[]"),
 	}
 
 	messages := make(chan *imap.Message)
@@ -236,6 +244,16 @@ func (c *Client) ReadEmail(folder string, uid uint32) (*rules.EmailContext, erro
 	email := c.messageToEmailContext(msg)
 	email.UID = uid
 	email.Folder = folder
+
+	// Brödtexten avkodas från hela meddelandet så att quoted-printable och
+	// charset hanteras korrekt.
+	if sectionName, err := imap.ParseBodySectionName(imap.FetchItem("BODY.PEEK[]")); err == nil {
+		if literal := msg.GetBody(sectionName); literal != nil {
+			if text, err := rawMessageText(literal); err == nil {
+				email.Body = text
+			}
+		}
+	}
 
 	return email, nil
 }
