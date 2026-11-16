@@ -90,7 +90,8 @@ identiska) - ett gemensamt förnamn räcker inte, så "Mikael Gidlund" och
 **slås ihop** eller markeras som **"behåll båda"**, så att det inte visas
 igen.
 
-Sammanslagning kräver admin-token (`NUXT_ADMIN_TOKEN`) och registreras i
+Sammanslagning kräver adminsession (inloggning på `/admin` med
+`NUXT_ADMIN_TOKEN`) och registreras i
 `person_merge`, så att nästa YAML-import inte skapar tillbaka den raderade
 posten. Se `db/README.md` för matchningsregeln i detalj och
 `db/test_merge.sql` för testerna.
@@ -114,8 +115,9 @@ Profilen sätts upp i UI:t: must-have, "minst N av M", nice-to-have, ort,
 pendelorter, senioritet, minsta antal år och vikter per del. Vikterna ligger i
 profilens `weights` (jsonb) och justeras per uppdrag utan kodändring.
 
-Att spara en kravprofil kräver admin-token (`NUXT_ADMIN_TOKEN`) - samma token
-som dubblettsammanslagningen. Läsning och rankning kräver ingen token.
+Att spara en kravprofil kräver adminsession (inloggning på `/admin`) - samma
+lösenord som dubblettsammanslagningen. Läsning och rankning kräver ingen
+inloggning.
 
 ## Pipelinen (kanban)
 
@@ -147,8 +149,8 @@ granskningssteget ligger i `pipeline_vote` - en anställd och en grundare per
 kort, och först när båda är gröna går kortet vidare till "kontaktad".
 
 Rörare identifieras via en namnlista (`pipeline_voter`) - appen har ingen
-inloggning, så man väljer sitt namn i toppen av sidan. Skrivning kräver
-admin-token, precis som resten av databasen.
+användarinloggning, så man väljer sitt namn i toppen av sidan. Skrivning kräver
+adminsession, precis som resten av databasen.
 
 ### Teams/Planner-listan
 
@@ -166,26 +168,29 @@ nästa steg; CSV-importen använder samma matchningsmotor, bara källan skiljer.
 
 Se `specs/candidate-pipeline.md` och `db/test_pipeline.sql`.
 
-## Admin-token
+## Admin-inloggning
 
 Skrivning mot masterdatabasen (dubblettsammanslagning, kravprofiler) kräver
-en token. Den skapas och sprids med ett skript - aldrig för hand och aldrig
-i repot:
+att man är inloggad som admin. Lösenordet sätts i appens miljö och sprids med
+ett skript - aldrig för hand och aldrig i repot:
 
 ```bash
-npm run admin:token init      # skapa token i src/nuxt/.env (gitignorad, 600)
-npm run admin:token show      # visa token - mata in i gränssnittet
+npm run admin:token init      # skapa lösenord i src/nuxt/.env (gitignorad, 600)
+npm run admin:token login     # öppna /admin i webbläsaren
 npm run admin:token apply <namespace>   # skapa Secret pappa-admin i klustret
-npm run admin:token status    # var token finns
+npm run admin:token status    # var lösenordet finns
 ```
 
-Servern letar upp token i `NUXT_ADMIN_TOKEN` (processmiljön eller
+Servern letar upp lösenordet i `NUXT_ADMIN_TOKEN` (processmiljön eller
 Kubernetes Secret `pappa-admin`) och faller tillbaka på `src/nuxt/.env`.
-Utan token är skrivning avstängd (503) - läsning och rankning fungerar
-ändå. Se `src/nuxt/README.md` för detaljer.
+På `/admin` matas lösenordet in och skickas till servern, som byter det mot en
+httpOnly-cookie - lösenordet syns aldrig i UI:t och lagras aldrig i
+webbläsaren. Utan inloggning är skrivning avstängd (401) - läsning och
+rankning fungerar ändå. CLI:er kan fortfarande skicka `x-admin-token`.
+Se `src/nuxt/README.md` för detaljer.
 
 `src/nuxt/.dockerignore` hindrar att env-filen kopieras in i Docker-imagen.
-Token får aldrig finnas i en image.
+Lösenordet får aldrig finnas i en image.
 
 ```bash
 curl localhost:3000/api/profiles

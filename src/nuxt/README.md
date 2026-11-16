@@ -116,32 +116,34 @@ sammanslagsknapp - bara "Behåll båda".
 - den raderade postens `external_id` registreras i `person_merge`, så att
   frölistan inte skapar tillbaka dubbletten vid nästa import.
 
-Skrivning kräver **admin-token**. Sätt den i appens miljö:
+Skrivning kräver **adminsession**. Logga in på `/admin` med lösenordet
+(`NUXT_ADMIN_TOKEN`) - det sätts i appens miljö:
 
 ```bash
 NUXT_ADMIN_TOKEN="$(openssl rand -hex 24)" npm run app:dev
 ```
 
-Enklare: skriptet skapar en token och sparar den i `src/nuxt/.env`
-(gitignorad, rättigheter `600`). Servern letar upp token där om den inte
+Enklare: skriptet skapar ett lösenord och sparar det i `src/nuxt/.env`
+(gitignorad, rättigheter `600`). Servern letar upp det där om det inte
 finns i processmiljön:
 
 ```bash
-npm run admin:token init      # skapa token i src/nuxt/.env
-npm run admin:token show      # visa token (mata in i gränssnittet)
-npm run admin:token status    # var token finns
+npm run admin:token init      # skapa lösenord i src/nuxt/.env
+npm run admin:token login     # öppna /admin i webbläsaren
+npm run admin:token status    # var lösenordet finns
 ```
 
-I klustret läses token från hemligheten `pappa-admin` (valfri - utan den är
-sammanslagning avstängd och appen svarar 503):
+I klustret läses lösenordet från hemligheten `pappa-admin` (valfri - utan den
+är sammanslagning avstängd och appen svarar 503):
 
 ```bash
 npm run admin:token apply <namespace>
 ```
 
-Det skapar/uppdaterar Secret `pappa-admin` med samma token som den lokala
-filen. Token matas in i gränssnittet (lagras i `sessionStorage`, inte
-`localStorage`) och skickas som `x-admin-token`.
+Det skapar/uppdaterar Secret `pappa-admin` med samma lösenord som den lokala
+filen. Inloggningen på `/admin` byter lösenordet mot en httpOnly-cookie -
+lösenordet syns aldrig i UI:t och lagras aldrig i webbläsaren.
+CLI:er kan fortfarande skicka `x-admin-token`.
 
 #### Var filen letas upp
 
@@ -156,8 +158,8 @@ Från en katalog utanför repot hittas ingenting - då är skrivning avstängd
 
 `src/nuxt/.dockerignore` utesluter `.env`, `node_modules`, `.output` och
 `.nuxt` från byggkontexten. Utan den skulle `COPY . .` i Dockerfile kopiera
-admin-token in i byggsteget. Runtime-imagen innehåller bara `.output`, så
-token finns inte i den - men byggcachen på maskinen hade innehållit den.
+admin-lösenordet in i byggsteget. Runtime-imagen innehåller bara `.output`, så
+lösenordet finns inte i den - men byggcachen på maskinen hade innehållit det.
 Kontrollera med:
 
 ```bash
@@ -171,10 +173,13 @@ docker run --rm --entrypoint sh pappa-buildtest -c 'test -f /app/.env && echo L�
 | Endpoint | Metod | Skydd | Beskrivning |
 |---|---|---|---|
 | `/api/duplicates` | GET | - | Dubblettkandidater: `candidates` (starka) och `weak` (svaga) |
-| `/api/duplicates/merge` | POST | `x-admin-token` | Slår ihop ett par (`a_id`, `b_id`, valfritt `keep`: `a`/`b`) |
-| `/api/duplicates/dismiss` | POST | `x-admin-token` | Markerar ett par som "behåll båda" (`a_id`, `b_id`) |
+| `/api/duplicates/merge` | POST | adminsession | Slår ihop ett par (`a_id`, `b_id`, valfritt `keep`: `a`/`b`) |
+| `/api/duplicates/dismiss` | POST | adminsession | Markerar ett par som "behåll båda" (`a_id`, `b_id`) |
 | `/api/profiles` | GET | - | Kravprofiler för uppdrag |
-| `/api/profiles` | POST | `x-admin-token` | Skapa eller uppdatera en kravprofil |
+| `/api/profiles` | POST | adminsession | Skapa eller uppdatera en kravprofil |
+| `/api/admin/login` | POST | - | Logga in med `{ password }` - sätter httpOnly-cookie |
+| `/api/admin/logout` | POST | - | Rensar adminsessionen |
+| `/api/admin/session` | GET | - | `{ authenticated }` - om adminsessionen gäller |
 | `/api/matches?profile=<uuid>` | GET | - | Rankade kandidater med delpoäng och förklaring |
 | `/api/competences` | GET | - | Kompetenstaxonomin - förslag i kravformuläret |
 | `/api/mail/**` | GET/PUT/POST | - | Proxy till mailagentens HTTP-API (`NUXT_MAIL_API_BASE`) |
@@ -194,9 +199,9 @@ Listan visar poäng, must-/nice-täckning och erfarenhetens grund. En kandidat
 expanderas för att visa delpoängen per del och hela förklaringen. Kandidater
 som inte täcker must-have hamnar under de godkända, inte borta.
 
-Spara och uppdatera av profilen kräver admin-token (`x-admin-token`) - samma
-token som dubblettsammanslagningen. Läsning och rankning är öppna, eftersom
-det är samma uppgifter som kandidatlistan visar.
+Spara och uppdatera av profilen kräver adminsession (inloggning på `/admin`) -
+samma lösenord som dubblettsammanslagningen. Läsning och rankning är öppna,
+eftersom det är samma uppgifter som kandidatlistan visar.
 
 ## Mailagentens sidor
 
@@ -209,7 +214,9 @@ sedan **godkänn/avvisa** per mejl.
 | --- | --- |
 | `/mail` | Inkorgen - konton, mappar, mejllista, AI-analys, beslut |
 | `/mail/rules` | Regeleditorn (se begränsningen nedan) |
-| `/mail/kameo-utbetalningar` | Låneuppgifter från Kameo med kort-/långsiktig klassificering |
+
+Kameo-sidan `/kameo-utbetalningar` ligger på toppnivå (den tillhör
+inte mailagentens sidor).
 
 ### Proxyn mot klienten
 
@@ -226,6 +233,10 @@ webbläsaren slipper CORS och att SSR i klustret når klienten via DNS-namnet.
 (`useRequestURL().origin`), relativ i webbläsaren.
 
 ### Kameo-uppgifterna
+
+Sidan `/kameo-utbetalningar` visar lånen i två flikar: **Aktiva lån**
+(`status = ongoing`) och **Återbetalade lån** (`status = repaid`). Fliken
+byter automatiskt om ett sökträffar ett lån på den andra fliken.
 
 `/api/kameo/loans` läser inloggningen i prioritetsordningen: miljövariablerna
 `KAMEO_EMAIL`/`KAMEO_PASSWORD`/`KAMEO_TOTP_SECRET` → den synkade filen
