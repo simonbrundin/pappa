@@ -20,7 +20,7 @@ onMounted(() => {
 })
 
 function handleBack() {
-  router.push('/')
+  router.push('/kandidater')
 }
 
 async function handleSave() {
@@ -28,7 +28,7 @@ async function handleSave() {
   if (!error.value && success.value) {
     // Navigate after showing success message
     setTimeout(() => {
-      router.push('/')
+      router.push('/kandidater')
     }, 1000)
   }
 }
@@ -41,9 +41,6 @@ function onContentUpdate(value: string) {
 <template>
   <div class="container">
     <header>
-      <button class="back-btn" @click="handleBack">
-        ← Tillbaka
-      </button>
       <h1>📝 Redigera Regler</h1>
     </header>
 
@@ -110,22 +107,6 @@ header {
   align-items: center;
   gap: 1.5rem;
   margin-bottom: 2rem;
-}
-
-.back-btn {
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: transparent;
-  color: #888;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
-}
-
-.back-btn:hover {
-  border-color: #667eea;
-  color: #fff;
 }
 
 h1 {

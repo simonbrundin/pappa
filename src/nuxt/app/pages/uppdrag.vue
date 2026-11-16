@@ -252,12 +252,6 @@ useHead({
 <template>
   <div class="mx-auto max-w-7xl px-5 py-10 sm:px-8">
     <header class="mb-8 flex flex-wrap items-center gap-3">
-      <NuxtLink
-        to="/"
-        class="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-ink-300 transition hover:border-brand-500/50 hover:text-white"
-      >
-        ← Till kandidaterna
-      </NuxtLink>
       <div>
         <h1 class="text-2xl font-semibold tracking-tight text-white">Uppdrag</h1>
         <p class="text-sm text-ink-400">

@@ -3,7 +3,6 @@ import { useKameoLoans } from '~/composables/useKameoLoans'
 
 useHead({ title: 'Kameo utbetalningar' })
 
-const router = useRouter()
 const { query, loading, error, result, search } = useKameoLoans()
 
 const hasSearched = ref(false)
@@ -41,10 +40,6 @@ function sourceLabel(value: string): string {
   return 'miljövariabler'
 }
 
-function handleBack() {
-  router.push('/')
-}
-
 onMounted(() => {
   search('')
 })
@@ -53,7 +48,6 @@ onMounted(() => {
 <template>
   <div class="container">
     <header>
-      <button class="back-btn" @click="handleBack">← Tillbaka</button>
       <h1><span class="emoji">💸</span> Kameo utbetalningar</h1>
       <p class="subtitle">
         Sök ett lånnummer hos Kameo och se om tillgången är kortsiktig eller långsiktig.
@@ -172,19 +166,6 @@ h1 {
 .subtitle {
   color: #888;
   margin: 0;
-}
-
-.back-btn {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  font-size: 0.95rem;
-  padding: 0.25rem 0;
-}
-
-.back-btn:hover {
-  color: #fff;
 }
 
 .emoji {

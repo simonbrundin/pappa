@@ -15,6 +15,10 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+  // Kandidatlistan ligger på /kandidater - startsidan skickar dit.
+  routeRules: {
+    '/': { redirect: '/kandidater' },
+  },
   runtimeConfig: {
     // Sätts via NUXT_DATABASE_URL, se server/utils/db.ts
     databaseUrl: '',

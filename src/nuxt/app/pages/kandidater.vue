@@ -169,18 +169,6 @@ useHead({
         >
           {{ showDuplicates ? '✕ Dölj dubbletter' : '⇄ Dubbletter' }}
         </button>
-        <NuxtLink
-          to="/uppdrag"
-          class="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-ink-300 transition hover:border-brand-500/50 hover:text-white"
-        >
-          ⬆ Uppdrag
-        </NuxtLink>
-        <NuxtLink
-          to="/mail"
-          class="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-ink-300 transition hover:border-brand-500/50 hover:text-white"
-        >
-          📬 Mail
-        </NuxtLink>
         <button
           type="button"
           class="ml-auto rounded-lg border border-white/10 px-3 py-1.5 text-xs text-ink-300 transition hover:border-brand-500/50 hover:text-white"
