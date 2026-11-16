@@ -11,26 +11,14 @@ const { data, status, error, refresh } = useFetch<DuplicatesResponse>('/api/dupl
 })
 
 /**
- * Admin-token. Lagras i sessionStorage (aldrig i localStorage) och skickas
- * som header. Utan token går det att läsa kandidaterna, men inte att
- * slå ihop - skrivning mot masterdatabasen ska aldrig vara publik.
- *
- * Delas med vyn "Uppdrag" via useAdminToken, så token sätts en gång.
+ * Skrivning (slå ihop / behåll båda) kräver en adminsession.
+ * Sessionen sätts genom att logga in på /admin och ligger i en
+ * httpOnly-cookie - lösenordet syns aldrig i UI:t.
  */
-const { token, input: tokenInput, load: loadToken, save: saveTokenRaw, headers } = useAdminToken()
 const busy = ref<string | null>(null)
 const message = ref<{ tone: 'ok' | 'error'; text: string } | null>(null)
 /** Visa de svaga paren (gemensamt förnamn/efternamn). */
 const showWeak = ref(false)
-
-onMounted(loadToken)
-
-function saveToken() {
-  saveTokenRaw(tokenInput.value)
-  message.value = token.value
-    ? { tone: 'ok', text: 'Token sparad för den här webbläsarsessionen.' }
-    : { tone: 'error', text: 'Tomt token - sammanslagning är avstängd.' }
-}
 
 const candidates = computed(() => data.value?.candidates ?? [])
 const weak = computed(() => data.value?.weak ?? [])
@@ -72,7 +60,6 @@ async function merge(candidate: DuplicateCandidate, keep: 'a' | 'b') {
   try {
     const result = await $fetch<Record<string, unknown>>('/api/duplicates/merge', {
       method: 'POST',
-      headers: headers(),
       body: { a_id: candidate.id_a, b_id: candidate.id_b, keep },
     })
     message.value = {
@@ -83,10 +70,19 @@ async function merge(candidate: DuplicateCandidate, keep: 'a' | 'b') {
     await refresh()
     emit('merged')
   } catch (err: unknown) {
-    const e = err as { data?: { message?: string }; statusMessage?: string }
+    const e = err as {
+      data?: { message?: string; statusCode?: number }
+      statusMessage?: string
+      statusCode?: number
+    }
+    const base = e.data?.message ?? e.statusMessage ?? 'Kunde inte slå ihop posterna.'
+    const status = e.statusCode ?? e.data?.statusCode
     message.value = {
       tone: 'error',
-      text: e.data?.message ?? e.statusMessage ?? 'Kunde inte slå ihop posterna.',
+      text:
+        status === 401
+          ? `${base} Logga in på /admin.`
+          : base,
     }
   } finally {
     busy.value = null
@@ -106,7 +102,6 @@ async function keepBoth(candidate: DuplicateCandidate) {
   try {
     await $fetch('/api/duplicates/dismiss', {
       method: 'POST',
-      headers: headers(),
       body: { a_id: candidate.id_a, b_id: candidate.id_b },
     })
     message.value = { tone: 'ok', text: `Markerat som olika personer: ${nameA} och ${nameB}.` }
@@ -145,28 +140,6 @@ async function keepBoth(candidate: DuplicateCandidate) {
       e-post/telefon är identiska). Ett gemensamt förnamn räcker inte - "Mikael Gidlund" och
       "Mikael Nordlund" är två personer. Inget slås ihop automatiskt.
     </p>
-
-    <div class="mb-4 flex flex-wrap items-end gap-2">
-      <label class="flex-1 min-w-56">
-        <span class="mb-1 block text-xs uppercase tracking-wide text-ink-400">Admin-token</span>
-        <input
-          v-model="tokenInput"
-          type="password"
-          placeholder="NUXT_ADMIN_TOKEN"
-          class="w-full rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2 text-sm text-white placeholder:text-ink-400 focus:border-brand-500 focus:outline-none"
-        />
-      </label>
-      <button
-        type="button"
-        class="rounded-xl border border-white/10 px-3 py-2 text-sm text-ink-100 transition hover:border-brand-500/50"
-        @click="saveToken"
-      >
-        Spara token
-      </button>
-      <span v-if="!token" class="text-xs text-rose-soft">
-        Utan token går det att läsa, men inte att slå ihop.
-      </span>
-    </div>
 
     <p
       v-if="message"

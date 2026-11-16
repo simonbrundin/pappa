@@ -1,20 +1,25 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Admin-token för pappa
+# Admin-lösenord för pappa
 #
-# Token krävs för att slå ihop dubbletter och för att spara kravprofiler
-# (POST /api/profiles). Utan token är skrivning avstängd (503).
+# Lösenordet krävs för att slå ihop dubbletter och för att spara kravprofiler
+# (POST /api/profiles). Utan inloggning är skrivning avstängd (503).
+#
+# I webbläsaren loggar man in på /admin med lösenordet - det skickas till
+# servern och byts mot en httpOnly-cookie. Lösenordet lagras aldrig i
+# webbläsaren. CLI:er kan fortfarande skicka det i headern x-admin-token.
 #
 # Hemligheten får aldrig committas. Den lever i:
 #   - src/nuxt/.env            (lokal utveckling, gitignorad)
 #   - Kubernetes Secret pappa-admin (i klustret)
 #
 # Kommandon:
-#   ./scripts/admin-token.sh init            skapa token om den saknas
-#   ./scripts/admin-token.sh show            visa token (för att mata in i UI)
+#   ./scripts/admin-token.sh init            skapa lösenord om det saknas
+#   ./scripts/admin-token.sh login [url]     öppna adminsidan i webbläsaren
+#   ./scripts/admin-token.sh show            visa lösenordet (för CLI/header)
 #   ./scripts/admin-token.sh apply [ns]      skapa/uppdatera Secret i klustret
 #   ./scripts/admin-token.sh apply-all       ... i dev, pr och prod
-#   ./scripts/admin-token.sh status          visa var token finns
+#   ./scripts/admin-token.sh status          visa var lösenordet finns
 # =============================================================================
 
 set -euo pipefail
@@ -120,6 +125,26 @@ cmd_apply_all() {
   return $failed
 }
 
+# Öppna adminsidan. Lösenordet matas in i webbläsaren - det skickas till
+# servern i requestkroppen och byts mot en httpOnly-cookie. Det hamnar
+# alltså inte i URL:en och inte i webbläsarens historik.
+cmd_login() {
+  local token url
+  token="$(read_local_token || true)"
+  if [[ -z "$token" ]]; then
+    echo "Ingen token i $ENV_FILE - kör 'init' först." >&2
+    exit 1
+  fi
+  url="${1:-${PAPPA_URL:-http://localhost:3000}}"
+  url="${url%/}/admin"
+  echo "$url"
+  if command -v xdg-open >/dev/null 2>&1; then
+    xdg-open "$url" >/dev/null 2>&1 || true
+  elif command -v open >/dev/null 2>&1; then
+    open "$url" >/dev/null 2>&1 || true
+  fi
+}
+
 cmd_status() {
   local token
   token="$(read_local_token || true)"
@@ -144,6 +169,7 @@ cmd_status() {
 
 case "${1:-}" in
   init) cmd_init ;;
+  login) cmd_login "${2:-}" ;;
   show) cmd_show ;;
   apply) cmd_apply "${2:-}" ;;
   apply-all) cmd_apply_all ;;

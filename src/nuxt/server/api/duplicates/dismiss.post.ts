@@ -1,5 +1,5 @@
-import { resolveAdminToken, safeEqual } from '../../utils/admin'
 import { getDb } from '../../utils/db'
+import { requireAdmin } from '../../utils/requireAdmin'
 
 interface DismissBody {
   a_id?: string
@@ -16,21 +16,7 @@ interface DismissBody {
  * Skrivning - kräver admin-token (NUXT_ADMIN_TOKEN).
  */
 export default defineEventHandler(async (event) => {
-  const token = resolveAdminToken()
-
-  if (!token) {
-    throw createError({
-      statusCode: 503,
-      statusMessage: 'Admin-token saknas',
-      message:
-        'Sätt NUXT_ADMIN_TOKEN i appens miljö för att kunna markera par som "behåll båda".',
-    })
-  }
-
-  const provided = getHeader(event, 'x-admin-token') ?? ''
-  if (!safeEqual(provided, token)) {
-    throw createError({ statusCode: 401, statusMessage: 'Obehörig', message: 'Fel admin-token.' })
-  }
+  requireAdmin(event)
 
   const body = await readBody<DismissBody>(event)
   const aId = body?.a_id

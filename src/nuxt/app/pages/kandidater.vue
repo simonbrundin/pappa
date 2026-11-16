@@ -26,7 +26,6 @@ const showDuplicates = ref(route.query.duplicates === '1')
 // Sourcingen (sökvägar + "solla") sker här: filtren väljer ur kandidaterna,
 // och den som är relevant läggs in i pipen med roll och sökväg.
 // ---------------------------------------------------------------------------
-const { headers } = useAdminToken()
 const addTarget = ref<Person | null>(null)
 const addRole = ref('')
 const addSource = ref<PipelineSource>('annat')
@@ -47,7 +46,6 @@ async function submitAdd() {
   try {
     await $fetch('/api/pipeline', {
       method: 'POST',
-      headers: headers(),
       body: {
         op: 'create',
         person_id: addTarget.value.id,

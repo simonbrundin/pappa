@@ -31,7 +31,6 @@ const { data, status, error, refresh } = useFetch<PipelineResponse>('/api/pipeli
   }),
 })
 
-const { token, input: tokenInput, load: loadToken, save: saveTokenRaw, headers } = useAdminToken()
 const busy = ref<string | null>(null)
 const message = ref<{ tone: 'ok' | 'error'; text: string } | null>(null)
 const dragging = ref<string | null>(null)
@@ -79,25 +78,22 @@ function cardsFor(stage: PipelineStage): BoardRow[] {
 
 const droppedCards = computed(() => cards.value.filter(c => c.stage === 'dropped'))
 
-onMounted(loadToken)
-
-function saveToken() {
-  saveTokenRaw(tokenInput.value)
-  message.value = token.value
-    ? { tone: 'ok', text: 'Token sparad för den här webbläsarsessionen.' }
-    : { tone: 'error', text: 'Tomt token - skrivning är avstängd.' }
-}
-
 async function call<T>(path: string, body: Record<string, unknown>): Promise<T> {
   // Nitros typade routes går inte att anropa med en variabel sökväg utan
   // att TypeScript exploderar i "excessive stack depth" - därför Any.
-  const response = await $fetch(path as any, { method: 'POST', headers: headers(), body })
+  const response = await $fetch(path as any, { method: 'POST', body })
   return response as T
 }
 
 function errorText(err: unknown): string {
-  const e = err as { data?: { message?: string }; statusMessage?: string }
-  return e.data?.message ?? e.statusMessage ?? 'Något gick fel.'
+  const e = err as {
+    data?: { message?: string; statusCode?: number }
+    statusMessage?: string
+    statusCode?: number
+  }
+  const base = e.data?.message ?? e.statusMessage ?? 'Något gick fel.'
+  const status = e.statusCode ?? e.data?.statusCode
+  return status === 401 ? `${base} Logga in på /admin.` : base
 }
 
 // ---------------------------------------------------------------------------
@@ -301,23 +297,6 @@ useHead({
           @click="refresh()"
         >
           ↻ Uppdatera
-        </button>
-      </div>
-
-      <div v-if="!token" class="card flex flex-wrap items-center gap-2 p-3 text-sm">
-        <span class="text-ink-300">Admin-token saknas - skrivning är avstängd.</span>
-        <input
-          v-model="tokenInput"
-          type="password"
-          placeholder="NUXT_ADMIN_TOKEN"
-          class="rounded-lg border border-white/10 bg-ink-950/60 px-3 py-1.5 text-sm text-white focus:border-brand-500 focus:outline-none"
-        />
-        <button
-          type="button"
-          class="rounded-lg bg-brand-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-brand-600"
-          @click="saveToken"
-        >
-          Spara
         </button>
       </div>
 

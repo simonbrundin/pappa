@@ -1,5 +1,5 @@
-import { resolveAdminToken, safeEqual } from '../utils/admin'
 import { getDb } from '../utils/db'
+import { requireAdmin } from '../utils/requireAdmin'
 
 interface ProfileBody {
   id?: string
@@ -29,20 +29,7 @@ const SENIORITIES = ['junior', 'mid', 'senior', 'lead', 'chef', 'cxo'] as const
  * rankas, så en öppen write-endpoint skulle kunna styra listan.
  */
 export default defineEventHandler(async (event) => {
-  const token = resolveAdminToken()
-
-  if (!token) {
-    throw createError({
-      statusCode: 503,
-      statusMessage: 'Admin-token saknas',
-      message: 'Sätt NUXT_ADMIN_TOKEN i appens miljö för att kunna spara kravprofiler.',
-    })
-  }
-
-  const provided = getHeader(event, 'x-admin-token') ?? ''
-  if (!safeEqual(provided, token)) {
-    throw createError({ statusCode: 401, statusMessage: 'Obehörig', message: 'Fel admin-token.' })
-  }
+  requireAdmin(event)
 
   const body = await readBody<ProfileBody>(event)
   if (!body?.title?.trim()) {

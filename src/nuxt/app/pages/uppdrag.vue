@@ -8,8 +8,6 @@ import type { JobProfile, MatchCandidate, ProfilesResponse } from '#shared/types
  * någon kontaktas - en hög poäng kan bygga på en gissad erfarenhet.
  */
 
-const { token, input, load, save, headers } = useAdminToken()
-
 const { data: profileData, refresh: refreshProfiles } = await useFetch<ProfilesResponse>(
   '/api/profiles',
   { key: 'job-profiles', default: (): ProfilesResponse => ({ profiles: [] }) },
@@ -100,7 +98,6 @@ if (profiles.value.length) {
 }
 
 onMounted(() => {
-  load()
   // Klienten kan ha en tom lista vid första renderingen.
   if (!selectedId.value && profiles.value.length) {
     edit(profiles.value[0]!)
@@ -194,7 +191,6 @@ async function saveProfile() {
   try {
     const result = (await api('/api/profiles', {
       method: 'POST',
-      headers: headers(),
       body: {
         id: form.id,
         title: form.title,
@@ -217,10 +213,19 @@ async function saveProfile() {
     await refreshProfiles()
     await loadMatches(result.id)
   } catch (err: unknown) {
-    const e = err as { data?: { message?: string }; statusMessage?: string }
+    const e = err as {
+      data?: { message?: string; statusCode?: number }
+      statusMessage?: string
+      statusCode?: number
+    }
+    const base = e.data?.message ?? e.statusMessage ?? 'Kunde inte spara profilen.'
+    const status = e.statusCode ?? e.data?.statusCode
     message.value = {
       tone: 'error',
-      text: e.data?.message ?? e.statusMessage ?? 'Kunde inte spara profilen.',
+      text:
+        status === 401
+          ? `${base} Logga in på /admin.`
+          : base,
     }
   } finally {
     saving.value = false
@@ -261,7 +266,7 @@ useHead({
     </header>
 
     <div class="grid gap-6 lg:grid-cols-[22rem_minmax(0,1fr)]">
-      <!-- Vänster: profiler + token -->
+      <!-- Vänster: profiler -->
       <aside class="space-y-4">
         <section class="card p-4">
           <div class="mb-3 flex items-center justify-between">
@@ -294,29 +299,6 @@ useHead({
           </ul>
           <p v-else class="text-xs text-ink-400">Inga profiler ännu.</p>
         </section>
-
-        <section class="card p-4">
-          <h2 class="mb-2 text-sm font-semibold text-white">Admin-token</h2>
-          <p class="mb-3 text-xs leading-relaxed text-ink-400">
-            Krävs för att spara en kravprofil. Lagras i sessionStorage.
-          </p>
-          <input
-            v-model="input"
-            type="password"
-            placeholder="NUXT_ADMIN_TOKEN"
-            class="mb-2 w-full rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2 text-sm text-white placeholder:text-ink-400 focus:border-brand-500 focus:outline-none"
-          />
-          <button
-            type="button"
-            class="w-full rounded-xl border border-white/10 px-3 py-2 text-sm text-ink-100 transition hover:border-brand-500/50"
-            @click="save(input)"
-          >
-            Spara token
-          </button>
-          <p v-if="!token" class="mt-2 text-xs text-rose-soft">
-            Utan token går det att titta, men inte att spara.
-          </p>
-        </section>
       </aside>
 
       <!-- Höger: formulär + rankad lista -->
@@ -326,7 +308,6 @@ useHead({
             <h2 class="text-lg font-semibold text-white">
               {{ form.id ? 'Redigera kravprofil' : 'Ny kravprofil' }}
             </h2>
-            <span v-if="form.id" class="chip">sparas med admin-token</span>
           </div>
 
           <div class="grid gap-4 md:grid-cols-2">

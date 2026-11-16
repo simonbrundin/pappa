@@ -37,6 +37,7 @@ const sections: NavSection[] = [
     items: [
       { to: '/kameo-utbetalningar', label: 'Kameo utbetalningar', icon: '💸' },
       { to: '/kameo-ranteutbetalningar', label: 'Ränteutbetalningar', icon: '📈' },
+      { to: '/admin', label: 'Admin', icon: '🔐' },
     ],
   },
 ]

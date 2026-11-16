@@ -1,5 +1,5 @@
-import { resolveAdminToken, safeEqual } from '../../utils/admin'
 import { getDb } from '../../utils/db'
+import { requireAdmin } from '../../utils/requireAdmin'
 
 interface MergeBody {
   /** Den ena posten i paret. */
@@ -25,26 +25,7 @@ interface MergeBody {
  *     frölistan inte skapar tillbaka dubbletten vid nästa import.
  */
 export default defineEventHandler(async (event) => {
-  const token = resolveAdminToken()
-
-  if (!token) {
-    throw createError({
-      statusCode: 503,
-      statusMessage: 'Admin-token saknas',
-      message:
-        'Sätt NUXT_ADMIN_TOKEN i appens miljö för att kunna slå ihop dubbletter. ' +
-        'Utan token är sammanslagning avsiktligt avstängd.',
-    })
-  }
-
-  const provided = getHeader(event, 'x-admin-token') ?? ''
-  if (!safeEqual(provided, token)) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: 'Obehörig',
-      message: 'Fel admin-token.',
-    })
-  }
+  requireAdmin(event)
 
   const body = await readBody<MergeBody>(event)
   const aId = body?.a_id
