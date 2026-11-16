@@ -2,9 +2,12 @@ package mcp
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -14,6 +17,7 @@ import (
 	"mailagent/imap"
 	"mailagent/rules"
 
+	"github.com/google/jsonschema-go/jsonschema"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -155,15 +159,15 @@ func (s *Server) ensureConnectionFor(accountName string) (*accountSession, error
 
 	credential, err := credentialFor(account)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get credentials: %w", err)
+		return nil, fmt.Errorf("failed to get credentials for account %q: %w", account.Name, err)
 	}
 
 	client, err := imap.NewClient(account)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create IMAP client: %w", err)
+		return nil, fmt.Errorf("failed to create IMAP client for account %q: %w", account.Name, err)
 	}
 	if err := client.Connect(credential); err != nil {
-		return nil, fmt.Errorf("failed to connect: %w", err)
+		return nil, fmt.Errorf("failed to connect to account %q: %w", account.Name, err)
 	}
 
 	session := &accountSession{
@@ -208,59 +212,168 @@ func (s *Server) resolveFolder(account *config.MailAccount, folder string) strin
 
 // --- Tool Definitions ---
 
-func (s *Server) addTools(server *mcp.Server) {
-	// List emails
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "list_emails",
-		Description: "List emails in a folder. Returns email subjects, senders, and UIDs.",
-	}, s.toolListEmails)
-
-	// Read email
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "read_email",
-		Description: "Read the full content of an email including body.",
-	}, s.toolReadEmail)
-
-	// Archive email
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "archive_email",
-		Description: "Archive an email.",
-	}, s.toolArchiveEmail)
-
-	// Reply to email
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "reply_to_email",
-		Description: "Reply to an email.",
-	}, s.toolReplyToEmail)
-
-	// Forward email
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "forward_email",
-		Description: "Forward an email to another email address. Requires 'to' parameter.",
-	}, s.toolForwardEmail)
-
-	// Move email
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "move_email",
-		Description: "Move an email to a different folder.",
-	}, s.toolMoveEmail)
-
-	// Process emails with AI
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "process_emails_with_ai",
-		Description: "Process emails using AI to decide and execute actions.",
-	}, s.toolProcessEmailsWithAI)
+// toolDefinition describes one MCP tool. It is kept separate from mcp.Tool so
+// the tool list can be built (and tested) without a live server.
+type toolDefinition struct {
+	Name        string
+	Description string
 }
 
-// --- Tool Handlers ---
+// toolDefinitions returns the tools the server exposes, with the configured
+// account names written into the descriptions. An agent can then see which
+// accounts exist without calling list_accounts first.
+func (s *Server) toolDefinitions() []toolDefinition {
+	accountHint := s.accountHint()
+
+	return []toolDefinition{
+		{
+			Name:        "list_accounts",
+			Description: "List the configured mail accounts, with username, folder and login state." + accountHint,
+		},
+		{
+			Name:        "list_emails",
+			Description: "List emails in a folder. Returns email subjects, senders, and UIDs." + accountHint,
+		},
+		{
+			Name:        "read_email",
+			Description: "Read the full content of an email including body." + accountHint,
+		},
+		{
+			Name:        "archive_email",
+			Description: "Archive an email." + accountHint,
+		},
+		{
+			Name:        "reply_to_email",
+			Description: "Reply to an email." + accountHint,
+		},
+		{
+			Name:        "forward_email",
+			Description: "Forward an email to another email address. Requires 'to' parameter." + accountHint,
+		},
+		{
+			Name:        "move_email",
+			Description: "Move an email to a different folder." + accountHint,
+		},
+		{
+			Name:        "process_emails_with_ai",
+			Description: "Process emails using AI to decide and execute actions." + accountHint,
+		},
+	}
+}
+
+// toolInputSchemas returns the JSON schema of each tool's arguments. The
+// schema is inferred the same way the MCP server infers it, so the tests see
+// exactly what an agent sees.
+func (s *Server) toolInputSchemas() map[string]*jsonschema.Schema {
+	schemas := make(map[string]*jsonschema.Schema)
+
+	for _, entry := range []struct {
+		name   string
+		params any
+	}{
+		{"list_accounts", ListAccountsParams{}},
+		{"list_emails", ListEmailsParams{}},
+		{"read_email", ReadEmailParams{}},
+		{"archive_email", ArchiveEmailParams{}},
+		{"reply_to_email", ReplyToEmailParams{}},
+		{"forward_email", ForwardEmailParams{}},
+		{"move_email", MoveEmailParams{}},
+		{"process_emails_with_ai", ProcessEmailsParams{}},
+	} {
+		schema, err := jsonschema.ForType(reflect.TypeOf(entry.params), &jsonschema.ForOptions{})
+		if err != nil {
+			continue
+		}
+		schemas[entry.name] = schema
+	}
+
+	return schemas
+}
+
+// accountHint describes the account parameter and the accounts that exist.
+// Every tool takes an optional "account" - an empty value means the default
+// account (the first configured one).
+func (s *Server) accountHint() string {
+	accounts := s.accountNames()
+
+	switch len(accounts) {
+	case 0:
+		return " No accounts are configured."
+	case 1:
+		return " Optional 'account' picks the account; empty means the default one. Accounts: " + accounts[0] + "."
+	default:
+		return " Optional 'account' picks the account; empty means the default one. Accounts: " + strings.Join(accounts, ", ") + "."
+	}
+}
+
+// accountNames returns the names of the configured accounts.
+func (s *Server) accountNames() []string {
+	if s.cfg == nil {
+		return nil
+	}
+	names := make([]string, 0, len(s.cfg.Mail))
+	for i := range s.cfg.Mail {
+		names = append(names, s.cfg.Mail[i].Name)
+	}
+	return names
+}
+
+func (s *Server) addTools(server *mcp.Server) {
+	for _, tool := range s.toolDefinitions() {
+		switch tool.Name {
+		case "list_accounts":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolListAccounts)
+		case "list_emails":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolListEmails)
+		case "read_email":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolReadEmail)
+		case "archive_email":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolArchiveEmail)
+		case "reply_to_email":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolReplyToEmail)
+		case "forward_email":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolForwardEmail)
+		case "move_email":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolMoveEmail)
+		case "process_emails_with_ai":
+			mcp.AddTool(server, &mcp.Tool{Name: tool.Name, Description: tool.Description}, s.toolProcessEmailsWithAI)
+		}
+	}
+}
+
+// ListAccountsParams has no parameters - list_accounts lists everything.
+type ListAccountsParams struct{}
+
+// toolListAccounts lists the configured accounts with their login state, so an
+// agent can pick which one to work with.
+func (s *Server) toolListAccounts(ctx context.Context, req *mcp.CallToolRequest, args ListAccountsParams) (*mcp.CallToolResult, any, error) {
+	accounts := make([]AccountInfo, 0, len(s.accountNames()))
+	for i := range s.cfg.Mail {
+		accounts = append(accounts, s.accountInfo(&s.cfg.Mail[i]))
+	}
+
+	payload, err := json.MarshalIndent(map[string]interface{}{"accounts": accounts}, "", "  ")
+	if err != nil {
+		return &mcp.CallToolResult{
+			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
+			IsError: true,
+		}, nil, nil
+	}
+
+	return &mcp.CallToolResult{
+		Content: []mcp.Content{&mcp.TextContent{Text: string(payload)}},
+	}, nil, nil
+}
 
 type ListEmailsParams struct {
-	Folder string `json:"folder"`
-	Limit  int    `json:"limit"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account string `json:"account,omitempty"`
+	Folder  string `json:"folder,omitempty"`
+	Limit   int    `json:"limit,omitempty"`
 }
 
 func (s *Server) toolListEmails(ctx context.Context, req *mcp.CallToolRequest, args ListEmailsParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
@@ -293,12 +406,14 @@ func (s *Server) toolListEmails(ctx context.Context, req *mcp.CallToolRequest, a
 }
 
 type ReadEmailParams struct {
-	Folder string `json:"folder"`
-	UID    int    `json:"uid"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account string `json:"account,omitempty"`
+	Folder  string `json:"folder,omitempty"`
+	UID     int    `json:"uid"`
 }
 
 func (s *Server) toolReadEmail(ctx context.Context, req *mcp.CallToolRequest, args ReadEmailParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
@@ -332,12 +447,14 @@ func (s *Server) toolReadEmail(ctx context.Context, req *mcp.CallToolRequest, ar
 }
 
 type ArchiveEmailParams struct {
-	Folder string `json:"folder"`
-	UID    int    `json:"uid"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account string `json:"account,omitempty"`
+	Folder  string `json:"folder,omitempty"`
+	UID     int    `json:"uid"`
 }
 
 func (s *Server) toolArchiveEmail(ctx context.Context, req *mcp.CallToolRequest, args ArchiveEmailParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
@@ -367,13 +484,15 @@ func (s *Server) toolArchiveEmail(ctx context.Context, req *mcp.CallToolRequest,
 }
 
 type ReplyToEmailParams struct {
-	Folder  string `json:"folder"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account string `json:"account,omitempty"`
+	Folder  string `json:"folder,omitempty"`
 	UID     int    `json:"uid"`
 	Message string `json:"message"`
 }
 
 func (s *Server) toolReplyToEmail(ctx context.Context, req *mcp.CallToolRequest, args ReplyToEmailParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
@@ -417,14 +536,16 @@ func (s *Server) toolReplyToEmail(ctx context.Context, req *mcp.CallToolRequest,
 }
 
 type ForwardEmailParams struct {
-	Folder string `json:"folder"`
-	UID    int    `json:"uid"`
-	To     string `json:"to"`
-	Note   string `json:"note"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account string `json:"account,omitempty"`
+	Folder  string `json:"folder,omitempty"`
+	UID     int    `json:"uid"`
+	To      string `json:"to"`
+	Note    string `json:"note"`
 }
 
 func (s *Server) toolForwardEmail(ctx context.Context, req *mcp.CallToolRequest, args ForwardEmailParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
@@ -479,13 +600,15 @@ func (s *Server) toolForwardEmail(ctx context.Context, req *mcp.CallToolRequest,
 }
 
 type MoveEmailParams struct {
-	Folder      string `json:"folder"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account     string `json:"account,omitempty"`
+	Folder      string `json:"folder,omitempty"`
 	UID         int    `json:"uid"`
 	Destination string `json:"destination"`
 }
 
 func (s *Server) toolMoveEmail(ctx context.Context, req *mcp.CallToolRequest, args MoveEmailParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},
@@ -521,12 +644,14 @@ func (s *Server) toolMoveEmail(ctx context.Context, req *mcp.CallToolRequest, ar
 }
 
 type ProcessEmailsParams struct {
-	Folder string `json:"folder"`
-	Limit  int    `json:"limit"`
+	// Account väljer vilket konto som läses. Tomt = första kontot.
+	Account string `json:"account,omitempty"`
+	Folder  string `json:"folder,omitempty"`
+	Limit   int    `json:"limit,omitempty"`
 }
 
 func (s *Server) toolProcessEmailsWithAI(ctx context.Context, req *mcp.CallToolRequest, args ProcessEmailsParams) (*mcp.CallToolResult, any, error) {
-	session, err := s.ensureConnection()
+	session, err := s.ensureConnectionFor(args.Account)
 	if err != nil {
 		return &mcp.CallToolResult{
 			Content: []mcp.Content{&mcp.TextContent{Text: "Error: " + err.Error()}},

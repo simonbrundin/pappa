@@ -109,14 +109,12 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 // --- MCP Tool List ---
 
 func (s *Server) httpMCPToolList(w http.ResponseWriter, r *http.Request) {
-	tools := []map[string]interface{}{
-		{"name": "list_emails", "description": "List emails in a folder"},
-		{"name": "read_email", "description": "Read full email content"},
-		{"name": "forward_email", "description": "Forward email to another address"},
-		{"name": "reply_to_email", "description": "Reply to an email"},
-		{"name": "archive_email", "description": "Archive an email"},
-		{"name": "move_email", "description": "Move email to another folder"},
-		{"name": "process_emails_with_ai", "description": "Process emails using AI and the configured rules"},
+	tools := make([]map[string]interface{}, 0, len(s.toolDefinitions()))
+	for _, tool := range s.toolDefinitions() {
+		tools = append(tools, map[string]interface{}{
+			"name":        tool.Name,
+			"description": tool.Description,
+		})
 	}
 	writeJSON(w, 200, map[string]interface{}{"tools": tools})
 }

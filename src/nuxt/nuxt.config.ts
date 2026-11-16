@@ -5,6 +5,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
   css: ['~/assets/css/main.css'],
+  // Komponenterna ligger i underkataloger (t.ex. app/components/mail/).
+  // Utan pathPrefix: false får de prefixet med katalognamnet
+  // ("MailAccountSelector"), vilket gör att en referens som
+  // <AccountSelector /> inte hittas - komponenten renderas aldrig.
+  components: [
+    { path: '~/components', pathPrefix: false },
+  ],
   vite: {
     plugins: [tailwindcss()],
   },
