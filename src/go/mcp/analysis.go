@@ -59,7 +59,8 @@ func (s *Server) httpAnalyzeEmails(w http.ResponseWriter, r *http.Request, path 
 		return
 	}
 
-	if s.aiProvider == nil || s.ruleSet == nil {
+	ruleSet := s.currentRuleSet()
+	if s.aiProvider == nil || ruleSet == nil {
 		writeError(w, 500, "AI provider or rules not configured")
 		return
 	}
@@ -108,6 +109,13 @@ func (s *Server) analyzeEmail(r *http.Request, session *accountSession, folder s
 		Actions: []suggestedAction{},
 	}
 
+	ruleSet := s.currentRuleSet()
+	if ruleSet == nil {
+		item.Error = "Reglerna är inte konfigurerade."
+		item.Description = "Reglerna kunde inte läsas, så mailet kunde inte analyseras."
+		return item
+	}
+
 	full, err := session.imapClient.ReadEmail(folder, e.UID)
 	if err != nil {
 		item.Error = fmt.Sprintf("kunde inte läsa mailet: %v", err)
@@ -117,7 +125,7 @@ func (s *Server) analyzeEmail(r *http.Request, session *accountSession, folder s
 	item.Subject = full.Subject
 	item.From = full.From
 
-	aiResp, err := s.aiProvider.Process(r.Context(), s.ruleSet.BuildPromptForAI(full))
+	aiResp, err := s.aiProvider.Process(r.Context(), ruleSet.BuildPromptForAI(full))
 	if err != nil {
 		item.Error = fmt.Sprintf("AI-fel: %v", err)
 		item.Description = "Analysen misslyckades - AI:t svarade inte."
@@ -135,11 +143,11 @@ func (s *Server) analyzeEmail(r *http.Request, session *accountSession, folder s
 	}
 	if ruleName != "" {
 		item.Rule = ruleName
-		if rule := s.ruleSet.FindRule(ruleName); rule != nil {
+		if rule := ruleSet.FindRule(ruleName); rule != nil {
 			item.Rule = rule.Name
 			item.Condition = rule.Condition.Raw
 		}
-	} else if rule := s.ruleSet.FindRuleInText(aiResp.Motivation); rule != nil {
+	} else if rule := ruleSet.FindRuleInText(aiResp.Motivation); rule != nil {
 		// The AI mentioned a rule in the motivation instead of the REGEL field.
 		item.Rule = rule.Name
 		item.Condition = rule.Condition.Raw

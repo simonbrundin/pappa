@@ -25,7 +25,6 @@ import (
 type Server struct {
 	cfg        *config.Config
 	aiProvider *ai.OpenAIProvider
-	ruleSet    *rules.RuleSet
 	executor   *actions.Executor
 	imapClient *imap.Client
 	account    *config.MailAccount
@@ -46,18 +45,42 @@ type Server struct {
 	// so that an approval can be executed with the exact proposed arguments.
 	analysesMu sync.Mutex
 	analyses   map[string]map[uint32]analysisItem
+
+	// rulesMu protects the rules, which can be replaced at runtime when
+	// someone edits them in the web UI.
+	rulesMu sync.RWMutex
+	// rulesPath is the file the rules are read from and written to.
+	rulesPath string
+	// rulesContent is the full markdown of the rules file, as read at
+	// startup or as last saved through the API.
+	rulesContent string
+	// ruleSet is the parsed version of rulesContent.
+	ruleSet *rules.RuleSet
 }
 
-// NewServer creates a new MCP server
-func NewServer(cfg *config.Config, aiProv *ai.OpenAIProvider, ruleSet *rules.RuleSet) *Server {
+// NewServer creates a new MCP server.
+//
+// rulesPath and rulesContent describe the rules file the server serves and
+// saves. rulesContent may be empty, in which case the file is read from
+// rulesPath when the rules are first needed.
+func NewServer(cfg *config.Config, aiProv *ai.OpenAIProvider, ruleSet *rules.RuleSet, rulesPath, rulesContent string) *Server {
 	return &Server{
-		cfg:        cfg,
-		aiProvider: aiProv,
-		ruleSet:    ruleSet,
-		sessions:   newSessionStore(),
-		logins:     make(map[string]*pendingLogin),
-		analyses:   make(map[string]map[uint32]analysisItem),
+		cfg:          cfg,
+		aiProvider:   aiProv,
+		ruleSet:      ruleSet,
+		rulesPath:    rulesPath,
+		rulesContent: rulesContent,
+		sessions:     newSessionStore(),
+		logins:       make(map[string]*pendingLogin),
+		analyses:     make(map[string]map[uint32]analysisItem),
 	}
+}
+
+// currentRuleSet returns the rules the AI should follow right now.
+func (s *Server) currentRuleSet() *rules.RuleSet {
+	s.rulesMu.RLock()
+	defer s.rulesMu.RUnlock()
+	return s.ruleSet
 }
 
 // analysisKey identifies the analyses for one account and folder.
@@ -681,7 +704,15 @@ func (s *Server) toolProcessEmailsWithAI(ctx context.Context, req *mcp.CallToolR
 			continue
 		}
 
-		aiResp, err := s.aiProvider.Process(ctx, s.ruleSet.BuildPromptForAI(fullEmail))
+		ruleSet := s.currentRuleSet()
+		if ruleSet == nil {
+			return &mcp.CallToolResult{
+				Content: []mcp.Content{&mcp.TextContent{Text: "Error: rules not configured"}},
+				IsError: true,
+			}, nil, nil
+		}
+
+		aiResp, err := s.aiProvider.Process(ctx, ruleSet.BuildPromptForAI(fullEmail))
 		if err != nil {
 			results += fmt.Sprintf("❌ #%d (%s): AI error - %v\n", email.UID, email.Subject, err)
 			continue

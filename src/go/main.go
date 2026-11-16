@@ -56,7 +56,7 @@ func main() {
 
 	log.Printf("Starting mailagent on %s", *addr)
 
-	server := mcp.NewServer(cfg, aiProvider, ruleSet)
+	server := mcp.NewServer(cfg, aiProvider, ruleSet, *rulesPath, string(ruleContent))
 	if err := server.StartHTTP(ctx, *addr); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Server error: %v", err)
 	}

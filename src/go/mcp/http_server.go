@@ -243,7 +243,8 @@ func (s *Server) httpProcessEmails(w http.ResponseWriter, r *http.Request, path 
 		limit = 50
 	}
 
-	if s.aiProvider == nil || s.ruleSet == nil {
+	ruleSet := s.currentRuleSet()
+	if s.aiProvider == nil || ruleSet == nil {
 		writeError(w, 500, "AI provider or rules not configured")
 		return
 	}
@@ -272,7 +273,7 @@ func (s *Server) httpProcessEmails(w http.ResponseWriter, r *http.Request, path 
 			continue
 		}
 
-		aiResp, err := s.aiProvider.Process(r.Context(), s.ruleSet.BuildPromptForAI(full))
+		aiResp, err := s.aiProvider.Process(r.Context(), ruleSet.BuildPromptForAI(full))
 		if err != nil {
 			result["error"] = fmt.Sprintf("AI-fel: %v", err)
 			results = append(results, result)
@@ -312,20 +313,3 @@ func (s *Server) defaultFolder(account *config.MailAccount) string {
 	return "INBOX"
 }
 
-func (s *Server) httpGetRules(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, 200, map[string]string{
-		"content": "# MailMaster Rules\n\nDefine email processing rules here.",
-	})
-}
-
-func (s *Server) httpUpdateRules(w http.ResponseWriter, r *http.Request) {
-	var req struct {
-		Content string `json:"content"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		writeError(w, 400, err.Error())
-		return
-	}
-	fmt.Printf("[MCP HTTP] Rules updated: %d chars\n", len(req.Content))
-	writeJSON(w, 200, map[string]string{"message": "Rules updated"})
-}
