@@ -177,6 +177,8 @@ docker run --rm --entrypoint sh pappa-buildtest -c 'test -f /app/.env && echo L�
 | `/api/profiles` | POST | `x-admin-token` | Skapa eller uppdatera en kravprofil |
 | `/api/matches?profile=<uuid>` | GET | - | Rankade kandidater med delpoäng och förklaring |
 | `/api/competences` | GET | - | Kompetenstaxonomin - förslag i kravformuläret |
+| `/api/mail/**` | GET/PUT/POST | - | Proxy till mailagentens HTTP-API (`NUXT_MAIL_API_BASE`) |
+| `/api/kameo/loans` | POST | - | Låneuppgifter från Kameo (kräver `KAMEO_*` i miljön) |
 
 ## Vyn "Uppdrag"
 
@@ -195,6 +197,54 @@ som inte täcker must-have hamnar under de godkända, inte borta.
 Spara och uppdatera av profilen kräver admin-token (`x-admin-token`) - samma
 token som dubblettsammanslagningen. Läsning och rankning är öppna, eftersom
 det är samma uppgifter som kandidatlistan visar.
+
+## Mailagentens sidor
+
+`/mail` (länk **"📬 Mail"** i sidhuvudet) hör till mailagenten - en AI-tjänst
+i `src/go` som läser mejl, matchar dem mot regler och föreslår åtgärder.
+Granskningen sker i två steg: **Analysera** (utan att utföra något) och
+sedan **godkänn/avvisa** per mejl.
+
+| Sida | Innehåll |
+| --- | --- |
+| `/mail` | Inkorgen - konton, mappar, mejllista, AI-analys, beslut |
+| `/mail/rules` | Regeleditorn (se begränsningen nedan) |
+| `/mail/kameo-utbetalningar` | Låneuppgifter från Kameo med kort-/långsiktig klassificering |
+
+### Proxyn mot klienten
+
+Webbappen anroppar **aldrig** mailagenten direkt. `server/api/mail/[...path].ts`
+vidarebefordrar till `NUXT_MAIL_API_BASE`:
+
+- i klustret: `http://mailagent:8401/api/v1` (servicen `mailagent`)
+- lokalt: `http://localhost:8401/api/v1` (standardvärdet)
+
+Sökvägen efter `/api/mail` skickas vidare ordagrant. Proxyn gör att
+webbläsaren slipper CORS och att SSR i klustret når klienten via DNS-namnet.
+
+`app/composables/useMailApiBase.ts` bygger URL:en: absolut på servern
+(`useRequestURL().origin`), relativ i webbläsaren.
+
+### Kameo-uppgifterna
+
+`/api/kameo/loans` läser inloggningen i prioritetsordningen: miljövariablerna
+`KAMEO_EMAIL`/`KAMEO_PASSWORD`/`KAMEO_TOTP_SECRET` → den synkade filen
+`environments/dev/kameo.env` → den SOPS-krypterade filen → 1Password via
+`op`. I containern finns inget `op`, så där måste `KAMEO_*` finnas i
+miljön (Secret `pappa-mail-secrets`).
+
+Filen synkas från 1Password med:
+
+```bash
+cd src/nuxt && npm run kameo:sync      # -> environments/dev/kameo.env.enc
+cd src/nuxt && npm run kameo:decrypt   # -> environments/dev/kameo.env
+```
+
+### Känd begränsning
+
+Regelendpointet är en stub - `PUT /api/v1/rules` kvitterar men sparar inte,
+och `GET` returnerar en fast text. Reglerna AI:n faktiskt använder läses ur
+`src/go/rules.md` i imagen. Detta är kvar från mailmaster-repot.
 
 ## GDPR i gränssnittet
 
