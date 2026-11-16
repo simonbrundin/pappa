@@ -45,6 +45,20 @@ interface Plan {
     iban: string | null
   } | null
   availableAmount: number
+  transactionDate: string
+  match: 'exakt' | 'närbelägen'
+  openRequests: Array<{
+    id: number
+    amount: number
+    status: string
+    destinationBankAccountId: number | null
+  }>
+  alreadyStored: {
+    id: string
+    fileName: string
+    createdAt: string
+    kameoWithdrawalId: number | null
+  } | null
   blocked: string | null
 }
 
@@ -67,6 +81,7 @@ interface ExecuteResult {
   withdrawalId: number | null
   withdrawalStatus: string
   archived: boolean
+  storedId: string | null
 }
 
 const executing = ref(false)
@@ -75,11 +90,37 @@ const executeError = ref<string | null>(null)
 
 const confirmed = ref(false)
 
+interface StoredPayment {
+  id: string
+  loanNumber: number
+  amount: number
+  currency: string
+  classification: string
+  account: string
+  fileName: string
+  subject: string
+  kameoWithdrawalId: number | null
+  createdAt: string
+}
+
+const storedPayments = ref<StoredPayment[]>([])
+
+async function loadStored() {
+  try {
+    const res = await $fetch<{ payments: StoredPayment[] }>('/api/kameo/interest-payments')
+    storedPayments.value = res.payments ?? []
+  } catch {
+    // Databasen kanske inte är nåbar - det ska inte stoppa sidan.
+    storedPayments.value = []
+  }
+}
+
 onMounted(async () => {
   await loadAccounts()
   if (!mailAccount.value) {
     mailAccount.value = accounts.value[0]?.name ?? currentAccount.value ?? ''
   }
+  await loadStored()
 })
 
 function formatDate(value: string): string {
@@ -95,6 +136,11 @@ function classificationLabel(value: string): string {
   if (value === 'kortsiktig') return 'Kortsiktig'
   if (value === 'langsiktig') return 'Långsiktig'
   return 'Okänd'
+}
+
+/** Formaterar ett belopp på svkt sätt: 12.2 -> "12,2". */
+function formatAmount(value: number): string {
+  return String(Math.round((value + Number.EPSILON) * 100) / 100).replace('.', ',')
 }
 
 async function search() {
@@ -161,6 +207,7 @@ async function execute() {
     emails.value = emails.value.filter(
       (email) => !(email.folder === plan.value?.folder && email.uid === plan.value?.uid),
     )
+    await loadStored()
   } catch (e: any) {
     executeError.value = e?.data?.statusMessage || e?.message || 'Räntebetalningen kunde inte göras.'
   } finally {
@@ -259,6 +306,28 @@ function downloadPdf() {
       </ul>
     </section>
 
+    <section v-if="storedPayments.length > 0" class="mb-6">
+      <h2 class="mb-2 text-sm font-semibold uppercase tracking-wider text-ink-400">
+        Sparade underlag ({{ storedPayments.length }})
+      </h2>
+      <ul class="space-y-2">
+        <li
+          v-for="payment in storedPayments"
+          :key="payment.id"
+          class="card flex flex-wrap items-center justify-between gap-3 p-3"
+        >
+          <div class="min-w-0">
+            <p class="truncate font-mono text-sm text-ink-100">{{ payment.fileName }}</p>
+            <p class="mt-0.5 truncate text-xs text-ink-400">
+              {{ new Date(payment.createdAt).toLocaleDateString('sv-SE') }} ·
+              konto {{ payment.account }}
+              <span v-if="payment.kameoWithdrawalId"> · uttag #{{ payment.kameoWithdrawalId }}</span>
+            </p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
     <p v-if="planning" class="mb-4 text-sm text-ink-400">Hämtar uppgifter från Kameo…</p>
 
     <p
@@ -292,7 +361,9 @@ function downloadPdf() {
         </div>
         <div>
           <dt class="text-xs uppercase tracking-wider text-ink-400">Tillgängligt hos Kameo</dt>
-          <dd class="mt-0.5 text-sm text-ink-100">{{ plan.availableAmount }} kr</dd>
+          <dd class="mt-0.5 text-sm text-ink-100">
+            {{ formatAmount(plan.availableAmount) }} kr
+          </dd>
         </div>
         <div>
           <dt class="text-xs uppercase tracking-wider text-ink-400">Utbetalningskonto</dt>
@@ -308,6 +379,40 @@ function downloadPdf() {
       <p class="mt-4 rounded-xl border border-white/8 bg-ink-950/60 px-3 py-2 font-mono text-xs text-ink-300">
         {{ plan.fileName }}
       </p>
+
+      <p class="mt-2 text-xs text-ink-400">
+        Transaktionsdatum {{ plan.transactionDate }} ({{ plan.match }} matchning)
+      </p>
+
+      <div
+        v-if="plan.openRequests.length > 0"
+        class="mt-4 rounded-xl border border-white/8 bg-ink-950/60 px-3 py-2"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-400">
+          Pågående utbetalningsbegäran hos Kameo
+        </p>
+        <ul class="mt-1 space-y-0.5 text-xs text-ink-300">
+          <li v-for="request in plan.openRequests" :key="request.id">
+            #{{ request.id }} · {{ formatAmount(request.amount) }} kr · {{ request.status }}
+          </li>
+        </ul>
+      </div>
+
+      <div
+        v-if="plan.alreadyStored"
+        class="mt-4 rounded-xl border border-white/8 bg-ink-950/60 px-3 py-2"
+      >
+        <p class="text-xs font-semibold uppercase tracking-wider text-ink-400">
+          Redan sparat underlag
+        </p>
+        <p class="mt-1 text-xs text-ink-300">
+          {{ plan.alreadyStored.fileName }} ·
+          {{ new Date(plan.alreadyStored.createdAt).toLocaleDateString('sv-SE') }}
+          <span v-if="plan.alreadyStored.kameoWithdrawalId">
+            · uttag #{{ plan.alreadyStored.kameoWithdrawalId }}
+          </span>
+        </p>
+      </div>
 
       <p
         v-if="plan.blocked"
@@ -354,6 +459,7 @@ function downloadPdf() {
           ({{ result.withdrawalStatus }})
         </li>
         <li>Mejlet arkiverat: {{ result.archived ? 'ja' : 'nej' }}</li>
+        <li>Underlag sparat: {{ result.storedId ? 'ja' : 'nej (databasen nåbar)' }}</li>
       </ul>
       <button
         type="button"

@@ -184,6 +184,10 @@ docker run --rm --entrypoint sh pappa-buildtest -c 'test -f /app/.env && echo L�
 | `/api/competences` | GET | - | Kompetenstaxonomin - förslag i kravformuläret |
 | `/api/mail/**` | GET/PUT/POST | - | Proxy till mailagentens HTTP-API (`NUXT_MAIL_API_BASE`) |
 | `/api/kameo/loans` | POST | - | Låneuppgifter från Kameo (kräver `KAMEO_*` i miljön) |
+| `/api/kameo/interest-emails` | POST | - | Sök räntebetalningsmejl i mailkontot |
+| `/api/kameo/interest-payment/plan` | POST | - | Förhandsvisning av en räntebetalning (belopp, konto, uttag) |
+| `/api/kameo/interest-payment/execute` | POST | - | Utför uttag, arkivera mejl och spara underlag |
+| `/api/kameo/interest-payments` | GET | - | Sparade underlag (senast först) |
 
 ## Vyn "Uppdrag"
 
@@ -216,7 +220,36 @@ sedan **godkänn/avvisa** per mejl.
 | `/mail/rules` | Regeleditorn (se begränsningen nedan) |
 
 Kameo-sidan `/kameo-utbetalningar` ligger på toppnivå (den tillhör
-inte mailagentens sidor).
+inte mailagentens sidor). Det gör också `/kameo-ranteutbetalningar`.
+
+### Ränteutbetalningar från Kameo
+
+Sidan `/kameo-ranteutbetalningar` hanterar räntebetalningsmejl från Kameo:
+
+1. **Hitta** - `/api/kameo/interest-emails` söker igenom Kameo-mapparna och
+   generella mappar som `INBOX.Deleted Messages` (där de senaste mejlen hamnar).
+   Ämnet "Räntebetalning - lån 5133" ger lånenumret.
+2. **Klassificera** - lånet blir kortsiktig (< 12 månader kvar) eller
+   långsiktig, vilket ger bokföringskonto **8313** resp. **8251**.
+3. **Belopp** - mejlet innehåller inte beloppet, det hämtas ur Kameos
+   transaktionslista genom att matcha transaktionsdatumet mot mejldatumet.
+4. **Underlag** - PDF:en får namnet
+   `Kameo - 5122 - Ränteutbetalning - 12,2 kr - 8313.pdf` och sparas i
+   tabellen `kameo_interest_payment` (bytea) så att den finns kvar för
+   bokföring.
+5. **Uttag** - samma belopp begärs ut till Företagskonto hos Kameo.
+6. **Arkivering** - mejlet flyttas till `INBOX.Archive`.
+
+Flödet går i två steg: `plan` visar allt utan att röra pengar, `execute`
+kräver `confirm: true` plus `expectLoanNumber` och `expectAmount` så att ett
+felaktigt mejl inte kan betalas ut.
+
+Flödet vägrar betala ut om
+
+- det redan finns en pågående utbetalningsbegäran hos Kameo som täcker
+  beloppet (t.ex. ett samlingsuttag för hela dagens ränta),
+- Kameos tillgängliga belopp inte räcker, eller
+- underlaget redan är sparat i databasen.
 
 ### Proxyn mot klienten
 

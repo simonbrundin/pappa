@@ -77,6 +77,10 @@ func (s *Server) HTTPHandler() http.Handler {
 		case r.Method == "POST" && strings.Contains(path, "/accounts/") && strings.Contains(path, "/folders/") && strings.Contains(path, "/emails/") && strings.HasSuffix(path, "/archive"):
 			s.httpArchiveEmail(w, r, path)
 
+		// Move one email: POST /api/v1/accounts/{account}/folders/{folder}/emails/{uid}/move
+		case r.Method == "POST" && strings.Contains(path, "/accounts/") && strings.Contains(path, "/folders/") && strings.Contains(path, "/emails/") && strings.HasSuffix(path, "/move"):
+			s.httpMoveEmail(w, r, path)
+
 		// Process: POST /api/v1/accounts/{account}/process
 		case r.Method == "POST" && strings.Contains(path, "/accounts/") && strings.HasSuffix(path, "/process"):
 			s.httpProcessEmails(w, r, path)
@@ -299,6 +303,48 @@ func (s *Server) httpArchiveEmail(w http.ResponseWriter, r *http.Request, path s
 		"uid":      uid,
 		"folder":   folder,
 		"archived": true,
+	})
+}
+
+// httpMoveEmail moves one email to another folder.
+//
+// Används för att flytta ett mejl tillbaka om det arkiverats av misstag, och
+// för att sortera mejl till en viss mapp.
+func (s *Server) httpMoveEmail(w http.ResponseWriter, r *http.Request, path string) {
+	account, folder, uid, ok := emailTarget(path)
+	if !ok {
+		writeError(w, 400, "invalid email path, expected .../emails/{uid}/move")
+		return
+	}
+
+	var req struct {
+		Destination string `json:"destination"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil || req.Destination == "" {
+		writeError(w, 400, "destination is required")
+		return
+	}
+
+	session, err := s.ensureConnectionFor(account)
+	if err != nil {
+		writeAccountError(w, err)
+		return
+	}
+
+	if folder == "" {
+		folder = s.defaultFolder(session.account)
+	}
+
+	if err := session.imapClient.MoveEmail(folder, req.Destination, uid); err != nil {
+		writeAccountError(w, err)
+		return
+	}
+
+	writeJSON(w, 200, map[string]interface{}{
+		"uid":         uid,
+		"from":        folder,
+		"destination": req.Destination,
+		"moved":       true,
 	})
 }
 

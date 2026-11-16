@@ -694,27 +694,43 @@ export interface KameoLoanTransaction {
  *
  * Används för att matcha en räntebetalning (mejl) mot rätt post i
  * transaktionslistan - mejlet innehåller inte beloppet.
+ *
+ * Lånet kan ligga på vilken sida som helst i pagineringen, så hela listan
+ * hämtas tills lånet är hittat.
  */
 export async function getLoanTransactions(loanNumber: number): Promise<KameoLoanTransaction[]> {
   const token = await login(Date.now())
-  const response = await apiGet<{ data: any[] }>(
-    token,
-    `/account/transactions-by-loan?home_currency=SEK&per_page=50&page=1`,
-  )
+  const perPage = 50
 
-  const loan = (response?.data ?? []).find(
-    (row: any) => Number(row.loan_number) === loanNumber || Number(row.loan_id) === loanNumber,
-  )
+  for (let page = 1; page <= 10; page++) {
+    const response = await apiGet<{ data: any[] }>(
+      token,
+      `/account/transactions-by-loan?home_currency=SEK&per_page=${perPage}&page=${page}`,
+    )
 
-  if (!loan) {
-    return []
+    const rows = response?.data ?? []
+    if (rows.length === 0) {
+      break
+    }
+
+    const loan = rows.find(
+      (row: any) => Number(row.loan_number) === loanNumber || Number(row.loan_id) === loanNumber,
+    )
+
+    if (loan) {
+      return (loan.transactions ?? []).map((transaction: any) => ({
+        date: String(transaction.date ?? ''),
+        description: String(transaction.description ?? ''),
+        amount: toNumber(transaction.to_home_currency_amount ?? transaction.amount),
+      }))
+    }
+
+    if (rows.length < perPage) {
+      break
+    }
   }
 
-  return (loan.transactions ?? []).map((transaction: any) => ({
-    date: String(transaction.date ?? ''),
-    description: String(transaction.description ?? ''),
-    amount: toNumber(transaction.to_home_currency_amount ?? transaction.amount),
-  }))
+  return []
 }
 
 /**

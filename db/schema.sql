@@ -1743,3 +1743,45 @@ comment on table pipeline_event is 'Stage-historik. Loggar varje flytt med vem, 
 comment on table pipeline_vote is 'Roster pa granskningskort. En anstalld och en grundare per kort.';
 comment on table planner_card is 'Kort fran Teams/Planner-listan "Rekrytering". Importeras via CSV tills Graph-behorighet finns.';
 comment on function fn_match_person is 'Matchar ett namn (och valfritt organisation) mot personregistret. Returnerar bast matchning over triskeln 0.75.';
+
+-- ============================================================================
+-- Kameo-ranteutbetalningar
+--
+-- Underlaget for varje ranteutbetalning: PDF:en av mejlet, beloppet och
+-- vilket konto det bokforts pa (8313 kortsiktig, 8251 langsiktig).
+--
+-- Tabellen lagrar en rad per utbetalning, inklusive vilket uttag hos Kameo
+-- den hangde ihop med. Det gor att en redan hanterad ranteutbetalning inte
+-- ska betalas ut igen.
+-- ============================================================================
+create table if not exists kameo_interest_payment (
+  id             uuid primary key default gen_random_uuid(),
+  loan_number    integer not null,
+  amount         numeric(12, 2) not null,
+  currency       text not null default 'SEK',
+  classification text not null,             -- 'kortsiktig' | 'langsiktig'
+  account        text not null,             -- '8313' | '8251'
+  file_name      text not null,
+  mail_account   text not null,
+  mail_folder    text not null,
+  mail_uid       integer not null,
+  subject        text not null,
+  email_date     timestamptz,
+  kameo_withdrawal_id integer,
+  kameo_account_id    integer,
+  pdf            bytea,                     -- underlaget (PDF)
+  created_at     timestamptz not null default now(),
+  unique (mail_account, mail_folder, mail_uid)
+);
+
+create index if not exists kameo_interest_payment_loan
+  on kameo_interest_payment (loan_number);
+create index if not exists kameo_interest_payment_created
+  on kameo_interest_payment (created_at desc);
+
+comment on table kameo_interest_payment is
+  'Ranteutbetalningar fran Kameo med PDF-underlag, belopp och bokforingskonto.';
+comment on column kameo_interest_payment.account is
+  'Bokforingskonto: 8313 for kortsiktiga lan, 8251 for langsiktiga.';
+comment on column kameo_interest_payment.pdf is
+  'PDF-underlaget - sparas for att kunna bokforas och bilaggas.';

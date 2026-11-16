@@ -220,6 +220,7 @@ Utanför mailagentens sidor:
 | Sida | Innehåll |
 |---|---|
 | `/kameo-utbetalningar` | Låneuppgifter från Kameo (kort- och långsiktig), flikar för aktiva och återbetalade lån |
+| `/kameo-ranteutbetalningar` | Räntebetalningsmejl från Kameo - PDF-underlag, bokföringskonto och uttag till Företagskonto |
 
 ### Så pratar webbappen med klienten
 

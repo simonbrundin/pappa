@@ -24,8 +24,19 @@ export interface MailboxEmail {
 }
 
 function mailApiBase(): string {
-  const config = useRuntimeConfig()
-  return String(config.mailApiBase || '').replace(/\/+$/, '')
+  // I Nuxt-servern finns runtimeConfig. I tester (och andra sammanhang utan
+  // Nuxt) är den inte tillgänglig, då läses adressen ur miljön.
+  try {
+    const config = useRuntimeConfig()
+    const fromConfig = config?.mailApiBase
+    if (fromConfig) {
+      return String(fromConfig).replace(/\/+$/, '')
+    }
+  } catch {
+    // useRuntimeConfig finns inte här - gå vidare till miljön.
+  }
+
+  return String(process.env.NUXT_MAIL_API_BASE || '').replace(/\/+$/, '')
 }
 
 async function mailRequest<T>(path: string, init: RequestInit = {}): Promise<T> {
