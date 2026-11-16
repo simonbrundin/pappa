@@ -192,7 +192,16 @@ function mailHandler(url: string, init?: RequestInit): Response {
     })
   }
   if (path.endsWith('/folders')) {
-    return jsonResponse({ folders: ['INBOX', 'INBOX.Kameo.Lån 5041'] })
+    return jsonResponse({
+      folders: [
+        'INBOX',
+        'INBOX.Deleted Messages',
+        'INBOX.Kameo',
+        'INBOX.Kameo.Lån 5041',
+        'INBOX.Archive',
+        'INBOX.Tessin',
+      ],
+    })
   }
   if (path.endsWith('/emails')) {
     return jsonResponse({
@@ -411,5 +420,56 @@ describe('executeInterestPayment', () => {
     expect(result.withdrawalId).toBeNull()
     expect(result.archived).toBe(false)
     expect(state.createdWithdrawal).toBeNull()
+  })
+})
+
+describe('mappar', () => {
+  test('rekommenderade mappar omfattar Kameo, raderade och arkivet', async () => {
+    const { interestFolders } = await import('../utils/mail/kameo-interest-flow')
+
+    const folders = await interestFolders('Michael Brundins')
+
+    expect(folders).toContain('INBOX')
+    expect(folders).toContain('INBOX.Kameo')
+    expect(folders).toContain('INBOX.Kameo.Lån 5041')
+    // De senaste räntebetalningsmejlen hamnade i Deleted Messages.
+    expect(folders).toContain('INBOX.Deleted Messages')
+    expect(folders).toContain('INBOX.Archive')
+    // O Irrelevanta mappar ska inte sökas igenom.
+    expect(folders).not.toContain('INBOX.Tessin')
+  })
+
+  test('söker bara i de mappar som väljs', async () => {
+    const { findInterestEmails } = await import('../utils/mail/kameo-interest-flow')
+
+    const emails = await findInterestEmails('Michael Brundins', {
+      folders: ['INBOX.Kameo.Lån 5041'],
+    })
+
+    expect(emails.length).toBe(1)
+    expect(emails[0]?.folder).toBe('INBOX.Kameo.Lån 5041')
+    expect(emails[0]?.loanNumber).toBe(5041)
+
+    // Bara den valda mappen ska ha lästs.
+    const listedFolders = calls
+      .filter((call) => call.url.includes('/emails?'))
+      .map((call) => decodeURIComponent(new URL(call.url).pathname))
+    expect(listedFolders).toEqual([
+      '/api/v1/accounts/Michael Brundins/folders/INBOX.Kameo.Lån 5041/emails',
+    ])
+  })
+
+  test('söker i flera valda mappar', async () => {
+    const { findInterestEmails } = await import('../utils/mail/kameo-interest-flow')
+
+    const emails = await findInterestEmails('Michael Brundins', {
+      folders: ['INBOX.Kameo.Lån 5041', 'INBOX.Deleted Messages'],
+    })
+
+    expect(emails.length).toBe(2)
+    expect(emails.map((email) => email.folder).sort()).toEqual([
+      'INBOX.Deleted Messages',
+      'INBOX.Kameo.Lån 5041',
+    ])
   })
 })

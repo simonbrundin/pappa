@@ -67,6 +67,13 @@ const { accounts, currentAccount, loadAccounts } = useMailAccounts()
 
 const mailAccount = ref(String(config.public.mailDefaultAccount || ''))
 
+/** Alla mappar i kontot och de som rekommenderas för räntebetalningar. */
+const availableFolders = ref<string[]>([])
+const recommendedFolders = ref<string[]>([])
+/** Mappar som sökningen faktiskt ska genomsöka. */
+const selectedFolders = ref<string[]>([])
+const loadingFolders = ref(false)
+
 const searching = ref(false)
 const searchError = ref<string | null>(null)
 const emails = ref<FoundEmail[]>([])
@@ -120,7 +127,40 @@ onMounted(async () => {
   if (!mailAccount.value) {
     mailAccount.value = accounts.value[0]?.name ?? currentAccount.value ?? ''
   }
+  await loadFolders()
   await loadStored()
+})
+
+/** Laddar mapparna för det valda kontot och väljer de rekommenderade. */
+async function loadFolders() {
+  if (!mailAccount.value) {
+    availableFolders.value = []
+    recommendedFolders.value = []
+    selectedFolders.value = []
+    return
+  }
+
+  loadingFolders.value = true
+  try {
+    const res = await $fetch<{
+      folders: string[]
+      recommended: string[]
+    }>('/api/kameo/interest-folders', { query: { account: mailAccount.value } })
+    availableFolders.value = res.folders ?? []
+    recommendedFolders.value = res.recommended ?? []
+    selectedFolders.value = [...recommendedFolders.value]
+  } catch {
+    availableFolders.value = []
+    recommendedFolders.value = []
+    selectedFolders.value = []
+  } finally {
+    loadingFolders.value = false
+  }
+}
+
+// Kontot ändras -> mapparna laddas om.
+watch(mailAccount, () => {
+  void loadFolders()
 })
 
 function formatDate(value: string): string {
@@ -154,11 +194,16 @@ async function search() {
   try {
     const res = await $fetch<{ emails: FoundEmail[] }>('/api/kameo/interest-emails', {
       method: 'POST',
-      body: { account: mailAccount.value },
+      body: {
+        account: mailAccount.value,
+        folders: selectedFolders.value.length > 0 ? selectedFolders.value : undefined,
+      },
     })
     emails.value = res.emails ?? []
     if (emails.value.length === 0) {
-      searchError.value = 'Inga räntebetalningsmejl hittades.'
+      searchError.value = selectedFolders.value.length
+        ? 'Inga räntebetalningsmejl hittades i de valda mapparna.'
+        : 'Inga mappar valda - välj minst en mapp att söka i.'
     }
   } catch (e: any) {
     searchError.value = e?.data?.statusMessage || e?.message || 'Kunde inte genomsöka e-posten.'
@@ -264,14 +309,24 @@ function downloadPdf() {
           </select>
         </div>
 
+
         <button
           type="button"
           class="rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 px-5 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
-          :disabled="searching || !mailAccount"
+          :disabled="searching || !mailAccount || selectedFolders.length === 0"
           @click="search"
         >
           {{ searching ? 'Söker…' : 'Hitta räntebetalningsmejl' }}
         </button>
+      </div>
+
+      <div class="mt-3">
+        <FolderPicker
+          v-model="selectedFolders"
+          :folders="availableFolders"
+          :recommended="recommendedFolders"
+          :disabled="loadingFolders"
+        />
       </div>
     </section>
 

@@ -1,10 +1,10 @@
-import {
-  findInterestEmails,
-  planInterestPayment,
-} from '../../utils/mail/kameo-interest-flow'
+import { findInterestEmails } from '../../utils/mail/kameo-interest-flow'
 
 /**
  * Hittar räntebetalningsmejl i mailagentens mappar.
+ *
+ * `folders` anger vilka mappar som ska genomsökas. Utan det söks de mappar
+ * som normalt innehåller räntebetalningsmejl.
  *
  * Svaret innehåller de mejl som hittades, utan att något utförs.
  */

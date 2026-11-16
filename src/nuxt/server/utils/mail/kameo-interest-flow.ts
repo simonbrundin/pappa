@@ -104,16 +104,23 @@ export interface InterestPaymentResult extends InterestPaymentPlan {
  * 5041"), men de senaste hamnade i "INBOX.Deleted Messages" - där hamnar
  * mejl som markerats som raderade i webbmejlen. Sökningen tar därför med
  * både Kameo-mapparna och de generella mapparna.
+ *
+ * Matchningen görs på mappens sista del, så att t.ex. "INBOX.Archive" och
+ * "INBOX.Kameo.Arkiv" träffar samma regel som "Archive".
  */
 export async function interestFolders(mailAccount: string): Promise<string[]> {
   const folders = await listMailFolders(mailAccount)
 
-  return folders.filter(
-    (folder) =>
-      folder === 'INBOX' ||
-      /kameo/i.test(folder) ||
-      /deleted messages|^archive$/i.test(folder),
-  )
+  return folders.filter((folder) => {
+    if (folder === 'INBOX') {
+      return true
+    }
+    if (/kameo/i.test(folder)) {
+      return true
+    }
+    const leaf = folder.split('.').pop() ?? folder
+    return /^(deleted messages|arkiv|archive)$/i.test(leaf)
+  })
 }
 
 /**

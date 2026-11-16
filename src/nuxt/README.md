@@ -185,6 +185,7 @@ docker run --rm --entrypoint sh pappa-buildtest -c 'test -f /app/.env && echo L�
 | `/api/mail/**` | GET/PUT/POST | - | Proxy till mailagentens HTTP-API (`NUXT_MAIL_API_BASE`) |
 | `/api/kameo/loans` | POST | - | Låneuppgifter från Kameo (kräver `KAMEO_*` i miljön) |
 | `/api/kameo/interest-emails` | POST | - | Sök räntebetalningsmejl i mailkontot |
+| `/api/kameo/interest-folders` | GET | - | Mapparna i ett konto + de som rekommenderas |
 | `/api/kameo/interest-payment/plan` | POST | - | Förhandsvisning av en räntebetalning (belopp, konto, uttag) |
 | `/api/kameo/interest-payment/execute` | POST | - | Utför uttag, arkivera mejl och spara underlag |
 | `/api/kameo/interest-payments` | GET | - | Sparade underlag (senast först) |
@@ -226,9 +227,13 @@ inte mailagentens sidor). Det gör också `/kameo-ranteutbetalningar`.
 
 Sidan `/kameo-ranteutbetalningar` hanterar räntebetalningsmejl från Kameo:
 
-1. **Hitta** - `/api/kameo/interest-emails` söker igenom Kameo-mapparna och
-   generella mappar som `INBOX.Deleted Messages` (där de senaste mejlen hamnar).
-   Ämnet "Räntebetalning - lån 5133" ger lånenumret.
+1. **Hitta** - `/api/kameo/interest-emails` söker igenom de mappar som valts
+   i UI:t. Ämnet "Räntebetalning - lån 5133" ger lånenumret.
+
+   Mappvalet är en checklista över kontots alla mappar, med de som
+   rekommenderas för räntebetalningar (Kameo-mapparna plus mappar som
+   raderade mejl hamnar i) förkryssade. Utan val söks de rekommenderade
+   mapparna. `/api/kameo/interest-folders` listar mapparna.
 2. **Klassificera** - lånet blir kortsiktig (< 12 månader kvar) eller
    långsiktig, vilket ger bokföringskonto **8313** resp. **8251**.
 3. **Belopp** - mejlet innehåller inte beloppet, det hämtas ur Kameos
