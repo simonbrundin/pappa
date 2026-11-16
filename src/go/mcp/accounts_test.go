@@ -3,6 +3,7 @@ package mcp
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"strings"
 	"testing"
 
@@ -165,6 +166,28 @@ func TestToolSchemasDoNotRequireOptionalArguments(t *testing.T) {
 					t.Errorf("tool %q marks %q as required, but it has a default", tool.name, arg)
 				}
 			}
+		}
+	}
+}
+
+// TestAccountErrorStatus checks that account errors get a status code that
+// describes what went wrong. A client must be able to tell an unknown
+// account from an account that needs a login.
+func TestAccountErrorStatus(t *testing.T) {
+	cases := []struct {
+		name   string
+		err    error
+		status int
+	}{
+		{"okänt konto", errors.New(`unknown account "Borta"`), 404},
+		{"inte inloggad", errors.New("failed to get credentials for account \"Soulmate\": account is not logged in: no cached OAuth token"), 401},
+		{"ogiltig inloggning", errors.New(`failed to connect to account "Michael Brundins": login failed: Authentication failed.`), 401},
+		{"annat fel", errors.New("something else went wrong"), 500},
+	}
+
+	for _, c := range cases {
+		if got := accountErrorStatus(c.err); got != c.status {
+			t.Errorf("%s: expected status %d, got %d", c.name, c.status, got)
 		}
 	}
 }

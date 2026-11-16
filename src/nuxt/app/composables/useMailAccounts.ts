@@ -84,9 +84,13 @@ export function useMailAccounts() {
       accountError.value = null
       folder.value = pickFolder(folders.value, folder.value || defaultFolder())
     } catch (e: any) {
-      // A failed folder listing usually means the account is not logged in.
-      // The login button already shows that, so no error is shown here.
+      // Ett 401 betyder att kontot behöver loggas in - login-knappen visas
+      // redan, så inget felmeddelande behövs. Ett 404 betyder att kontot inte
+      // finns längre, vilket är värt att veta.
       folders.value = []
+      if (e?.statusCode === 404) {
+        accountError.value = e?.data?.error || 'Kontot finns inte längre.'
+      }
       await refreshAccountState()
     }
   }

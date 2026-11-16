@@ -106,6 +106,33 @@ func writeError(w http.ResponseWriter, status int, msg string) {
 	writeJSON(w, status, map[string]string{"error": msg})
 }
 
+// writeAccountError writes an error that came from an account operation. It
+// picks the status code from the error message, so the client can tell an
+// unknown account (404) from an account that needs a login (401) from a real
+// server error (500).
+func writeAccountError(w http.ResponseWriter, err error) {
+	writeError(w, accountErrorStatus(err), err.Error())
+}
+
+// accountErrorStatus maps an account error to an HTTP status code.
+func accountErrorStatus(err error) int {
+	if err == nil {
+		return 500
+	}
+	message := err.Error()
+	switch {
+	case strings.Contains(message, "unknown account"):
+		return 404
+	case strings.Contains(message, "not logged in"),
+		strings.Contains(message, "no cached OAuth token"),
+		strings.Contains(message, "login failed"),
+		strings.Contains(message, "login required"):
+		return 401
+	default:
+		return 500
+	}
+}
+
 // --- MCP Tool List ---
 
 func (s *Server) httpMCPToolList(w http.ResponseWriter, r *http.Request) {
@@ -143,7 +170,7 @@ func (s *Server) httpListEmails(w http.ResponseWriter, r *http.Request, path str
 
 	session, err := s.ensureConnectionFor(account)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
@@ -154,7 +181,7 @@ func (s *Server) httpListEmails(w http.ResponseWriter, r *http.Request, path str
 
 	emails, err := s.listEmails(session, folder, limit)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
@@ -200,7 +227,7 @@ func (s *Server) httpProcessEmails(w http.ResponseWriter, r *http.Request, path 
 
 	session, err := s.ensureConnectionFor(account)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
@@ -223,7 +250,7 @@ func (s *Server) httpProcessEmails(w http.ResponseWriter, r *http.Request, path 
 
 	emails, err := s.listEmails(session, folder, uint32(limit))
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 

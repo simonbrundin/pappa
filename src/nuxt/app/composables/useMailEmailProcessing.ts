@@ -49,6 +49,15 @@ export function useMailEmailProcessing() {
   const decisions = ref<Record<number, Decision>>({})
   const decidingUid = ref<number | null>(null)
 
+  // Töm listan när kontot byts - annars visas mejl från det gamla kontot
+  // under det nya kontots namn tills användaren trycker "Hämta mejl".
+  watch(currentAccount, () => {
+    emails.value = []
+    analyses.value = {}
+    decisions.value = {}
+    error.value = null
+  })
+
   // accountPath is the account name used in the API calls. It follows the
   // account selected in the UI.
   function accountPath(): string {

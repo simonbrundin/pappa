@@ -55,7 +55,7 @@ func (s *Server) httpAnalyzeEmails(w http.ResponseWriter, r *http.Request, path 
 
 	session, err := s.ensureConnectionFor(account)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
@@ -78,7 +78,7 @@ func (s *Server) httpAnalyzeEmails(w http.ResponseWriter, r *http.Request, path 
 
 	emails, err := s.listEmails(session, folder, uint32(limit))
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
@@ -271,7 +271,7 @@ func (s *Server) httpDecideEmail(w http.ResponseWriter, r *http.Request, path st
 
 	session, err := s.ensureConnectionFor(account)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
@@ -290,7 +290,7 @@ func (s *Server) httpDecideEmail(w http.ResponseWriter, r *http.Request, path st
 
 	full, err := session.imapClient.ReadEmail(folder, req.UID)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 

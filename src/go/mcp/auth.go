@@ -189,13 +189,13 @@ func (s *Server) httpAccountFolders(w http.ResponseWriter, r *http.Request, path
 
 	session, err := s.ensureConnectionFor(account)
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 
 	folders, err := session.imapClient.ListFolders()
 	if err != nil {
-		writeError(w, 500, err.Error())
+		writeAccountError(w, err)
 		return
 	}
 	if folders == nil {
