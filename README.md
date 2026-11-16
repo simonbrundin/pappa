@@ -19,9 +19,17 @@ db/             Applikationens datalager
   migrate.sh / backup.sh / restore.sh  Drift
   queries.sql     Driftfrågor
 src/nuxt/       Webappen (Nuxt) - läser personerna via /api/people
+  app/pages/mail/   Mailagentens sidor (inkorg, regler, Kameo-lån)
+  server/api/mail/  Proxy till mailagentens HTTP-API
+src/go/         Mailagenten - AI-tjänsten som läser och sorterar mail
+  main.go          HTTP-server (API v1 + MCP)
+  imap/ oauth/ ai/ actions/ rules/   IMAP/SMTP, Microsoft-inloggning, modell, åtgärder
+  config/config.yaml  Konton och AI-inställningar
+  rules.md          Regler som AI:n följer
 src/neon/       Neon-integration (policy, env-variabler, anslutning)
   neon.ts         Policy: vilka tjänster branchen har
   env.sh / env.py / pappa_db.py  Env + anslutning
+specs/          Feature-specifikationer (t.ex. mailagenten)
 environments/   Kubernetes-manifest (Kustomize + Tilt)
   dev/             Dev-miljön - kör mot Neon, ingen databas i klustret
   prod/            Produktionsmanifest
@@ -39,6 +47,15 @@ npm run db:import    # ladda frölistan + anställningshistorik
 npm run neon:deploy  # applicera Neon-policyn
 
 cd src/nuxt && npm run build && npm run dev   # webappen
+```
+
+### Mailagenten lokalt
+
+```bash
+docker build -t mailagent:latest src/go
+docker run -d --name mailagent -p 8401:8401 \
+  --env-file environments/dev/mail.env mailagent:latest
+cd src/nuxt && npm run dev    # proxar /api/mail -> localhost:8401
 ```
 
 ## Dev i klustret (Tilt)
@@ -127,3 +144,58 @@ curl "localhost:3000/api/matches?profile=PROFIL-ID"
 ```
 
 Se `db/README.md` (avsnitt 10) och `db/test_match.sql`.
+
+## Mailagenten
+
+Utöver masterdatabasen kör repot **mailagenten** (`src/go`) - en AI-tjänst
+som läser mejl, matchar dem mot regler och föreslår åtgärder (svara, flytta,
+arkivera). Klienten är en Go-tjänst med två ytor:
+
+- HTTP-API `/api/v1` - används av webbappen
+- MCP-endpoint `/mcp` - används av agenter (Claude m.fl.)
+
+### Sidor i webbappen
+
+| Sida | Innehåll |
+|---|---|
+| `/mail` | Inkorgen - läsa mejl, analysera med AI, godkänna/avvisa åtgärder |
+| `/mail/rules` | Regeleditorn |
+| `/mail/kameo-utbetalningar` | Låneuppgifter från Kameo (kort- och långsiktig) |
+
+### Så pratar webbappen med klienten
+
+Webbappen går **aldrig** direkt mot mailagenten. Anropen går via Nuxt:s egen
+serverproxy `server/api/mail/[...path].ts`, som vidarebefordrar till
+`NUXT_MAIL_API_BASE` (`http://mailagent:8401/api/v1` i klustret). Det ger
+tre fördelar: webbläsaren slipper CORS, SSR i klustret når klienten via
+DNS-namnet `mailagent`, och klientens adress behöver inte finnas i klienten.
+
+### Hemligheter
+
+`MAIL_PASSWORD_MICHAEL` (IMAP), `OPENAI_API_KEY` (AI) och Kameo-uppgifterna
+(`KAMEO_EMAIL`, `KAMEO_PASSWORD`, `KAMEO_TOTP_SECRET`) ligger i
+`environments/dev/mail.env` (gitignorad) och sprids till klustret som
+Secret `pappa-mail-secrets`:
+
+```bash
+npm run mail:secrets apply <namespace>   # skapa/uppdatera Secretet
+npm run mail:secrets status               # var hemligheterna finns
+```
+
+Utan Secretet startar tjänsterna ändå - men klienten kan inte logga in, och
+Kameo-sidan svarar 502.
+
+### I klustret
+
+`environments/base/mailagent-deployment.yaml` deployar klienten (Tilt bygger
+imagen ur `src/go/Dockerfile`). OAuth-token cachas i en emptyDir, så en
+inloggning (Microsoft device-code) måste göras om när poden skapas om.
+Inloggningen sker från UI:t: `/mail` → välj kontot → "Logga in med Microsoft"
+→ mata in koden i webbläsaren.
+
+### Känt begränsning
+
+Regelendpointet är en stub: `PUT /api/v1/rules` kvitterar men sparar inte,
+och `GET` returnerar en fast text. Reglerna som AI:n faktiskt använder läses
+ur `src/go/rules.md` i imagen. Detta är kvar från mailmaster-repot - se
+`specs/ai-mail-processor.md`.

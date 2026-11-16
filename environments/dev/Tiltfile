@@ -44,6 +44,10 @@ default_registry("localhost:5000")
 
 docker_build("nuxt-app", "../../src/nuxt")
 
+# Mailagenten - Go-tjänsten som läser/sorterar mail. Klienten lyssnar på
+# HTTP-API:t (/api/v1) och MCP-endpointen (/mcp).
+docker_build("mailagent", "../../src/go")
+
 # =============================================================================
 # Neon-hemligheten
 #

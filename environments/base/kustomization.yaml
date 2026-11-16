@@ -8,5 +8,8 @@ resources:
   - namespace.yaml
   - nuxt-deployment.yaml
   - nuxt-service.yaml
+  # Mailagenten - AI-tjänsten som läser och sorterar mail.
+  - mailagent-deployment.yaml
+  - mailagent-service.yaml
   # Databasen är Neon (Lakebase Postgres) - ingen databas i klustret.
   # Miljöerna levererar anslutningssträngarna i en Secret (pappa-neon-db).

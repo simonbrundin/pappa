@@ -54,3 +54,28 @@ spec:
                   name: pappa-admin
                   key: NUXT_ADMIN_TOKEN
                   optional: true
+            # Mailagentens HTTP-API, nådbar från Nuxt via servicen
+            # "mailagent" i samma namespace. Anropen proxias vidare av
+            # server/api/mail/[...path].ts.
+            - name: NUXT_MAIL_API_BASE
+              value: http://mailagent:8401/api/v1
+            # Kameo-uppgifterna (låneuppgifter) läses ur Secret
+            # pappa-mail-secrets. Utan dem svarar /api/kameo med 502.
+            - name: KAMEO_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: pappa-mail-secrets
+                  key: KAMEO_EMAIL
+                  optional: true
+            - name: KAMEO_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pappa-mail-secrets
+                  key: KAMEO_PASSWORD
+                  optional: true
+            - name: KAMEO_TOTP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: pappa-mail-secrets
+                  key: KAMEO_TOTP_SECRET
+                  optional: true

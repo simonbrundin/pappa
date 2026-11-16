@@ -13,3 +13,12 @@ __pycache__/
 
 # Databasdumpar - innehåller personuppgifter. Får aldrig committas.
 db/backups/
+
+# Mailagentens hemligheter (IMAP-lösenord, AI-nyckel, Kameo). Får aldrig committas.
+environments/dev/mail.env
+environments/dev/kameo.env
+environments/dev/kameo.env.enc
+
+# Go-binärer och loggar från mailagenten
+src/go/mailagent
+src/go/*.log

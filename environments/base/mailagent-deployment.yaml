@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailagent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mailagent
+  template:
+    metadata:
+      labels:
+        app: mailagent
+    spec:
+      containers:
+        - name: mailagent
+          image: mailagent:latest
+          args:
+            - -addr=:8401
+            - -config=/app/config/config.yaml
+            - -rules=/app/rules.md
+          ports:
+            - containerPort: 8401
+          env:
+            # Hemligheterna kommer ur Secret pappa-mail-secrets
+            # (MAIL_PASSWORD_MICHAEL, OPENAI_API_KEY). Utan dem kan
+            # klienten inte logga in - den startar ändå.
+            - name: MAIL_PASSWORD_MICHAEL
+              valueFrom:
+                secretKeyRef:
+                  name: pappa-mail-secrets
+                  key: MAIL_PASSWORD_MICHAEL
+                  optional: true
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pappa-mail-secrets
+                  key: OPENAI_API_KEY
+                  optional: true
+            # OAuth-token cachas här - monteras som emptyDir, se nedan.
+            - name: XDG_CACHE_HOME
+              value: /cache
+            - name: HOME
+              value: /root
+          volumeMounts:
+            - name: cache
+              mountPath: /cache
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8401
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8401
+            initialDelaySeconds: 3
+            periodSeconds: 10
+            failureThreshold: 3
+      volumes:
+        # OAuth-token (Microsoft device-code) överlever container-omstarter
+        # men inte att poden skapas om. En PVC behövs om den ska överleva
+        # även det.
+        - name: cache
+          emptyDir: {}
