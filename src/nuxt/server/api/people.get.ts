@@ -1,10 +1,13 @@
 import { getDb } from '../utils/db'
+import { isMissingSchema, throwMissingSchema } from '../utils/schema'
 import type { CvEntry, Person } from '#shared/types/people'
 
 export default defineEventHandler(async () => {
   const sql = getDb()
 
-  const rows = await sql<Person[]>`
+  let rows: Person[]
+  try {
+    rows = await sql<Person[]>`
     select
       p.id,
       p.external_id,
@@ -55,6 +58,12 @@ export default defineEventHandler(async () => {
     left join organization o on o.id = p.organization_id
     order by o.name nulls last, p.full_name
   `
+  } catch (err) {
+    // Pipeline-kolumnerna refererar tabeller som kan saknas före första
+    // migreringen - då ska kandidaterna ändå gå att visa.
+    if (isMissingSchema(err)) throwMissingSchema()
+    throw err
+  }
 
   // Anställningshistorik i CV-format: var, vad, hur länge.
   const cvRows = await sql<CvEntry[]>`

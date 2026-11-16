@@ -1,4 +1,5 @@
 import { getDb } from '../utils/db'
+import { isMissingSchema, throwMissingSchema } from '../utils/schema'
 import type {
   PipelineCard,
   PipelineResponse,
@@ -50,14 +51,21 @@ interface VoteRow {
 export default defineEventHandler(async (): Promise<PipelineResponse> => {
   const sql = getDb()
 
-  const rows = await sql<CardRow[]>`
-    select id, person_id, full_name, organization, title, location, email, phone,
-           do_not_contact, linkedin_slug, role_label, stage, source, source_note,
-           note, drop_reason, teams_ref, owner_id, owner_name, owner_role,
-           entered_stage_at, updated_at
-      from v_pipeline_board
-     order by full_name, role_label
-  `
+  let rows: CardRow[]
+  try {
+    rows = await sql<CardRow[]>`
+      select id, person_id, full_name, organization, title, location, email, phone,
+             do_not_contact, linkedin_slug, role_label, stage, source, source_note,
+             note, drop_reason, teams_ref, owner_id, owner_name, owner_role,
+             entered_stage_at, updated_at
+        from v_pipeline_board
+       order by full_name, role_label
+    `
+  } catch (err) {
+    // Saknas tabellerna ger ett begripligt svar i stället för ett rått 500.
+    if (isMissingSchema(err)) throwMissingSchema()
+    throw err
+  }
 
   const voteRows = await sql<VoteRow[]>`
     select pipeline_id, voter_role, approved, note, at, voter_name
