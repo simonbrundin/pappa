@@ -31,8 +31,10 @@ export interface Person {
   source_count: number
   source_urls: string[]
   linkedin_slug: string | null
-  /** Indikerar om kandidaten är i den aktiva rekryteringspoolen. */
+  /** Sant om kandidaten är i den aktiva rekryteringspoolen just nu. */
   is_potential: boolean
+  /** Sant om granskningsdatumet har passerat - kandidaten är tillbaka i poolen. */
+  review_passed: boolean
   /** Skäl till varför kandidaten inte är aktuell. */
   not_relevant_reason: string | null
   /** Datum för nästa genomgång. */
@@ -79,6 +81,25 @@ export interface PeopleResponse {
   people: Person[]
   facets: PeopleFacets
   count: number
+}
+
+/** Så här uppdateras en kandidatens potential. */
+export interface PotentialUpdate {
+  person_id: string
+  /** true = tillbaka i rekryteringspoolen, false = parkrad. */
+  is_potential: boolean
+  /** Skäl till varför kandidaten inte är aktuell nu. */
+  not_relevant_reason?: string | null
+  /** Datum då kandidaten ska ses över igen (yyyy-mm-dd). */
+  potential_review_at?: string | null
+}
+
+/** Svaret efter en potentialuppdatering. */
+export interface PotentialResult {
+  id: string
+  is_potential: boolean
+  not_relevant_reason: string | null
+  potential_review_at: string | null
 }
 
 /** En sida i ett dubblettpar. */

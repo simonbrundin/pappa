@@ -44,9 +44,18 @@ export default defineEventHandler(async () => {
         '{}'::text[]
       ) as source_urls,
       p.linkedin_slug,
-      p.is_potential,
+      -- Pool-status. En parkad kandidat kommer tillbaka automatiskt när
+      -- datumet för genomgång har passerat - då ska hon kunna rekryteras
+      -- igen. Beräknas här i stället för i databasen, så att listan är rätt
+      -- direkt när datumet passerar utan att något behöver köras.
+      (coalesce(p.is_potential, true)
+        or (p.potential_review_at is not null and p.potential_review_at <= current_date))
+        as is_potential,
+      -- Sant om granskningsdatumet har passerat (kandidaten är tillbaka).
+      (p.potential_review_at is not null and p.potential_review_at <= current_date)
+        as review_passed,
       p.not_relevant_reason,
-      p.potential_review_at,
+      p.potential_review_at::text as potential_review_at,
       coalesce(
         (select array_agg(distinct cp.stage::text)
            from candidate_pipeline cp where cp.person_id = p.id),

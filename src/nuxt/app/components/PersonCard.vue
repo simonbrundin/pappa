@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import type { CvEntry, Person } from '#shared/types/people'
+import { formatDate } from '#shared/utils/potential'
 
 const props = defineProps<{ person: Person }>()
 
-const emit = defineEmits<{ 'add-to-pipeline': [person: Person] }>()
+const emit = defineEmits<{
+  'add-to-pipeline': [person: Person]
+  'mark-not-current': [person: Person]
+  'reactivate': [person: Person]
+}>()
 
 /** Kort etikett för pipeline-stegen på personkortet. */
 const stageLabel: Record<string, string> = {
@@ -38,6 +43,14 @@ const hue = computed(() => {
 
 const canContact = computed(
   () => props.person.contact_published && !props.person.do_not_contact && !!props.person.email,
+)
+
+/**
+ * Kandidaten är parkerad i databasen men har kommit tillbaka - datumet för
+ * genomgång har passerat, så personen ligger i poolen igen.
+ */
+const returnedForReview = computed(
+  () => props.person.is_potential && props.person.review_passed,
 )
 
 const confidenceTone = computed(() => {
@@ -167,6 +180,30 @@ const employmentTypeLabel: Record<string, string> = {
         <dt class="w-5 shrink-0 text-center text-ink-400">▸</dt>
         <dd class="truncate">Tillgänglig från {{ person.available_from }}</dd>
       </div>
+      <div v-if="!person.is_potential" class="flex items-center gap-2 text-ink-300">
+        <dt class="w-5 shrink-0 text-center text-amber-soft">⏸</dt>
+        <dd class="truncate">
+          Inte aktuell just nu
+          <span v-if="person.not_relevant_reason" class="text-ink-400">
+            · {{ person.not_relevant_reason }}
+          </span>
+          <span v-if="person.potential_review_at" class="ml-1 text-ink-400">
+            · ses över {{ formatDate(person.potential_review_at) }}
+          </span>
+        </dd>
+      </div>
+      <div v-else-if="returnedForReview" class="flex items-center gap-2 text-ink-300">
+        <dt class="w-5 shrink-0 text-center text-mint-400">↩</dt>
+        <dd class="truncate">
+          Tillbaka i poolen
+          <span v-if="person.not_relevant_reason" class="text-ink-400">
+            · var {{ person.not_relevant_reason.toLowerCase() }}
+          </span>
+          <span v-if="person.potential_review_at" class="ml-1 text-ink-400">
+            · granskad {{ formatDate(person.potential_review_at) }}
+          </span>
+        </dd>
+      </div>
     </dl>
 
     <ul v-if="person.competences.length" class="flex flex-wrap gap-1.5">
@@ -224,6 +261,25 @@ const employmentTypeLabel: Record<string, string> = {
         @click="emit('add-to-pipeline', person)"
       >
         🗂️ Pipeline
+      </button>
+
+      <button
+        v-if="person.is_potential"
+        type="button"
+        class="rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-ink-300 transition hover:bg-amber-soft/20 hover:text-amber-soft"
+        title="Parkera kandidaten - hon är inte aktuell nu, men kan ses över senare"
+        @click="emit('mark-not-current', person)"
+      >
+        ⏸ Ej aktuell
+      </button>
+      <button
+        v-else
+        type="button"
+        class="rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-ink-300 transition hover:bg-mint-400/20 hover:text-mint-400"
+        title="Lägg tillbaka kandidaten i rekryteringspoolen"
+        @click="emit('reactivate', person)"
+      >
+        ▶ Aktiv igen
       </button>
     </footer>
 
