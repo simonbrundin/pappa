@@ -149,7 +149,10 @@ onMounted(() => {
   </div>
 </template>
 
-<style>
+<style scoped>
+/*
+ * Scoped - som global CSS läckte dessa regler in i pappas övriga sidor.
+ */
 .container {
   max-width: 1000px;
   margin: 0 auto;

@@ -11,7 +11,7 @@ const { current, folders, folder, needsLogin, selectFolder } = useMailAccounts()
 </script>
 
 <template>
-  <div class="container">
+  <div class="container mail-root">
     <header>
       <h1><span class="emoji">📬</span> MailMaster</h1>
       <p class="subtitle">Account: {{ current?.name ?? '—' }}</p>
@@ -55,18 +55,17 @@ const { current, folders, folder, needsLogin, selectFolder } = useMailAccounts()
   </div>
 </template>
 
-<style>
-* {
+<style scoped>
+/*
+ * Stilen är scoped - som global CSS nollställde den här reseten
+ * Tailwind-marginaler och -paddingar i resten av appen.
+ * Den egna resetten begränsas till mailvyn via :deep, så att den även
+ * gäller inne i komponenterna (AccountSelector, EmailList, EmailControls).
+ */
+.mail-root :deep(*) {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-}
-
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background: #0f0f0f;
-  color: #fff;
-  min-height: 100vh;
 }
 
 .container {
