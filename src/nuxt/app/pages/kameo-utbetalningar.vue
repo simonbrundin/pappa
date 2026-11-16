@@ -7,9 +7,33 @@ const { query, loading, error, result, search } = useKameoLoans()
 
 const hasSearched = ref(false)
 
+/** Flikarna: pågående lån respektive redan återbetalade lån. */
+type LoanTab = 'ongoing' | 'repaid'
+
+const activeTab = ref<LoanTab>('ongoing')
+
+const allLoans = computed(() => result.value?.results ?? [])
+
+const tabCounts = computed(() => ({
+  ongoing: allLoans.value.filter((loan) => loan.status === 'ongoing').length,
+  repaid: allLoans.value.filter((loan) => loan.status === 'repaid').length,
+}))
+
+const visibleLoans = computed(() => allLoans.value.filter((loan) => loan.status === activeTab.value))
+
+/**
+ * Ett sökträffar ett återbetalat lån medan fliken "Aktiva lån" är vald -
+ * då byter vi flik så att resultatet inte försvinner.
+ */
 async function onSearch() {
   hasSearched.value = true
   await search()
+
+  const loans = allLoans.value
+  const [firstLoan] = loans
+  if (firstLoan && !loans.some((loan) => loan.status === activeTab.value)) {
+    activeTab.value = firstLoan.status === 'ongoing' ? 'repaid' : 'ongoing'
+  }
 }
 
 function formatDate(value: string | null): string {
@@ -81,13 +105,47 @@ onMounted(() => {
       <span class="muted">· inloggning via {{ sourceLabel(result.source) }}</span>
     </div>
 
-    <div v-if="result && result.results.length === 0 && !loading" class="empty">
-      <p>Inga lån matchade {{ result.query }}.</p>
-      <p class="hint">Kontrollera att lånnumret stämmer med det som visas i Kameo.</p>
+    <nav class="tabs" aria-label="Lånekategorier">
+      <button
+        type="button"
+        class="tab"
+        :class="{ active: activeTab === 'ongoing' }"
+        :aria-pressed="activeTab === 'ongoing'"
+        @click="activeTab = 'ongoing'"
+      >
+        Aktiva lån
+        <span class="tab-count">{{ tabCounts.ongoing }}</span>
+      </button>
+      <button
+        type="button"
+        class="tab"
+        :class="{ active: activeTab === 'repaid' }"
+        :aria-pressed="activeTab === 'repaid'"
+        @click="activeTab = 'repaid'"
+      >
+        Återbetalade lån
+        <span class="tab-count">{{ tabCounts.repaid }}</span>
+      </button>
+    </nav>
+
+    <div v-if="result && visibleLoans.length === 0 && !loading" class="empty">
+      <template v-if="allLoans.length === 0">
+        <p>Inga lån matchade {{ result.query }}.</p>
+        <p class="hint">Kontrollera att lånnumret stämmer med det som visas i Kameo.</p>
+      </template>
+      <template v-else>
+        <p v-if="activeTab === 'ongoing'">Inga aktiva lån.</p>
+        <p v-else>Inga återbetalade lån.</p>
+        <p class="hint">
+          {{ activeTab === 'ongoing'
+            ? 'Byt till "Återbetalade lån" för att se redan avslutade lån.'
+            : 'Byt till "Aktiva lån" för att se lån som fortfarande löper.' }}
+        </p>
+      </template>
     </div>
 
-    <ul v-if="result && result.results.length > 0" class="loan-list">
-      <li v-for="loan in result.results" :key="loan.loanNumber" class="loan-card">
+    <ul v-if="visibleLoans.length > 0" class="loan-list">
+      <li v-for="loan in visibleLoans" :key="loan.loanNumber" class="loan-card">
         <div class="loan-head">
           <div>
             <span class="loan-number">{{ loan.loanNumber }}</span>
@@ -239,6 +297,52 @@ h1 {
 .empty {
   text-align: center;
   color: #666;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #888;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.tab:hover {
+  color: #fff;
+}
+
+.tab.active {
+  color: #fff;
+  border-bottom-color: #667eea;
+}
+
+.tab-count {
+  padding: 0.1rem 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #bbb;
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 999px;
+}
+
+.tab.active .tab-count {
+  color: #fff;
+  border-color: #667eea;
 }
 
 .loan-list {

@@ -309,8 +309,7 @@ async function readOpCredentials(now: number): Promise<Credentials> {
 /**
  * Slår upp inloggningsuppgifterna i prioriterad ordning:
  * miljövariabler -> synkad fil -> 1Password via op-cli.
- */
-async function resolveCredentials(now: number): Promise<Credentials> {
+ */async function resolveCredentials(now: number): Promise<Credentials> {
   const fromEnv = readEnvCredentials(now)
   if (fromEnv) {
     return fromEnv
@@ -428,6 +427,30 @@ async function apiGet<T>(token: string, path: string): Promise<T> {
   return (await response.json()) as T
 }
 
+async function apiPost<T>(token: string, path: string, payload: unknown): Promise<T> {
+  const response = await fetch(`${KAMEO_API}${path}`, {
+    method: 'POST',
+    headers: {
+      authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(LOGIN_TIMEOUT_MS),
+  })
+
+  const body = await response.text()
+
+  if (!response.ok) {
+    throw new Error(`Kameo-anropet ${path} misslyckades (HTTP ${response.status}): ${body}`)
+  }
+
+  if (!body) {
+    return {} as T
+  }
+
+  return JSON.parse(body) as T
+}
+
 function toNumber(value: unknown): number {
   const parsed = Number.parseFloat(String(value ?? '').replace(',', '.'))
   return Number.isFinite(parsed) ? parsed : 0
@@ -538,4 +561,168 @@ export async function lookupKameoLoans(query: string): Promise<KameoLookupResult
     source: lastSource,
     results: filterLoans(mapped, query),
   }
+}
+
+/**
+ * Ett bankkonto som pengar kan utbetalas till.
+ */
+export interface KameoWithdrawalAccount {
+  id: number
+  accountName: string
+  accountHolderName: string | null
+  bankName: string
+  bankAccountNumber: string
+  currency: string
+  iban: string | null
+  isMainAccount: boolean
+}
+
+/**
+ * Hämtar de bankkonton som Kameo kan utbetala till.
+ */
+export async function getWithdrawalAccounts(): Promise<KameoWithdrawalAccount[]> {
+  const token = await login(Date.now())
+  const response = await apiGet<{ data: any[] }>(token, '/customer/withdrawal-accounts')
+
+  return (response?.data ?? []).map((account) => ({
+    id: Number(account.id),
+    accountName: String(account.account_name ?? ''),
+    accountHolderName: account.account_holder_name ?? null,
+    bankName: String(account.bank_name ?? ''),
+    bankAccountNumber: String(account.bank_account_number ?? ''),
+    currency: String(account.currency ?? 'SEK'),
+    iban: account.bank_iban ?? null,
+    isMainAccount: account.is_main_account === 1 || account.is_main_account === true,
+  }))
+}
+
+/**
+ * Sammanfattningen av uttagsbegäran per kundkonto.
+ */
+export interface KameoWithdrawalSummary {
+  accountNo: string
+  amountAvailable: number
+  currency: string
+  requests: Array<{
+    id: number
+    amount: number
+    status: string
+    destinationBankAccountId: number | null
+  }>
+}
+
+/**
+ * Hämtar uttagsöversikten - tillgängligt belopp och pågående begäran.
+ */
+export async function getWithdrawalSummary(): Promise<KameoWithdrawalSummary[]> {
+  const token = await login(Date.now())
+  const response = await apiGet<{ data: any }>(token, '/customer/withdrawal-requests/summary')
+  const accounts = response?.data?.customer_accounts ?? []
+
+  return accounts.map((account: any) => ({
+    accountNo: String(account.account_no ?? ''),
+    amountAvailable: toNumber(account.amount_available),
+    currency: String(account.currency_code ?? 'SEK'),
+    requests: (account.withdrawal_requests ?? []).map((request: any) => ({
+      id: Number(request.id),
+      amount: toNumber(request.amount),
+      status: String(request.status_info?.description ?? 'okänd'),
+      destinationBankAccountId: request.destination_bank_account_id
+        ? Number(request.destination_bank_account_id)
+        : null,
+    })),
+  }))
+}
+
+/**
+ * Resultatet av en utbetalningsbegäran.
+ */
+export interface KameoWithdrawalRequest {
+  id: number | null
+  amount: number
+  currency: string
+  status: string
+  destinationBankAccountId: number | null
+}
+
+/**
+ * Begär ett uttag från Kameo till ett bankkonto.
+ *
+ * Payload:en följer portalens eget format - `bank_details_id` pekar ut
+ * bankkontot och `account_no` kundkontot hos Kameo.
+ */
+export async function createWithdrawalRequest(
+  amount: number,
+  destinationBankAccountId: number,
+  accountNo: string,
+): Promise<KameoWithdrawalRequest> {
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error(`Beloppet ${amount} är inte ett positivt tal.`)
+  }
+
+  const token = await login(Date.now())
+  const response = await apiPost<any>(token, '/customer/withdrawal-requests/create', {
+    bank_details_id: destinationBankAccountId,
+    account_no: Number(accountNo),
+    amount,
+  })
+
+  const request = response?.data ?? response ?? {}
+
+  return {
+    id: request.id ? Number(request.id) : null,
+    amount: toNumber(request.amount ?? amount),
+    currency: String(request.currency_code ?? request.currencyCode ?? 'SEK'),
+    status: String(request.status_info?.description ?? request.status ?? 'skickad'),
+    destinationBankAccountId: request.destination_bank_account_id
+      ? Number(request.destination_bank_account_id)
+      : destinationBankAccountId,
+  }
+}
+
+/**
+ * Transaktionerna för ett lån, t.ex. räntebetalningar.
+ */
+export interface KameoLoanTransaction {
+  date: string
+  description: string
+  amount: number
+}
+
+/**
+ * Hämtar transaktionerna för ett lån.
+ *
+ * Används för att matcha en räntebetalning (mejl) mot rätt post i
+ * transaktionslistan - mejlet innehåller inte beloppet.
+ */
+export async function getLoanTransactions(loanNumber: number): Promise<KameoLoanTransaction[]> {
+  const token = await login(Date.now())
+  const response = await apiGet<{ data: any[] }>(
+    token,
+    `/account/transactions-by-loan?home_currency=SEK&per_page=50&page=1`,
+  )
+
+  const loan = (response?.data ?? []).find(
+    (row: any) => Number(row.loan_number) === loanNumber || Number(row.loan_id) === loanNumber,
+  )
+
+  if (!loan) {
+    return []
+  }
+
+  return (loan.transactions ?? []).map((transaction: any) => ({
+    date: String(transaction.date ?? ''),
+    description: String(transaction.description ?? ''),
+    amount: toNumber(transaction.to_home_currency_amount ?? transaction.amount),
+  }))
+}
+
+/**
+ * Kundkontot hos Kameo (account_no), vilket behövs vid uttag.
+ */
+export async function getPrimaryAccountNo(): Promise<string | null> {
+  const token = await login(Date.now())
+  const accounts = await apiGet<any[]>(token, '/me/customer-accounts')
+  const primary = accounts.find((account) => account.is_primary) ?? accounts[0]
+  return primary?.account_no ? String(primary.account_no) : null
 }

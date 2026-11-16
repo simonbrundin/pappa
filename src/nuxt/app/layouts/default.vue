@@ -35,7 +35,8 @@ const sections: NavSection[] = [
   {
     title: null,
     items: [
-      { to: '/mail/kameo-utbetalningar', label: 'Kameo utbetalningar', icon: '💸' },
+      { to: '/kameo-utbetalningar', label: 'Kameo utbetalningar', icon: '💸' },
+      { to: '/kameo-ranteutbetalningar', label: 'Ränteutbetalningar', icon: '📈' },
     ],
   },
 ]
@@ -52,8 +53,8 @@ watch(() => route.path, () => {
 
 /**
  * Endast den mest specifika träffen markeras aktiv.
- * "/mail/kameo-utbetalningar" ligger under "/mail" i sökvägen, men är en
- * egen toppnivå i menyn - annars skulle både Inkorg och Kameo lysa samtidigt.
+ * "/kameo-utbetalningar" är en egen toppnivå i menyn, inte en del av
+ * "/mail" - annars skulle både Inkorg och Kameo lysa samtidigt.
  */
 const activeTo = computed(() => {
   const path = route.path.replace(/\/+$/, '') || '/kandidater'
