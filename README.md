@@ -193,9 +193,14 @@ inloggning (Microsoft device-code) måste göras om när poden skapas om.
 Inloggningen sker från UI:t: `/mail` → välj kontot → "Logga in med Microsoft"
 → mata in koden i webbläsaren.
 
-### Känt begränsning
+### Regler
 
-Regelendpointet är en stub: `PUT /api/v1/rules` kvitterar men sparar inte,
-och `GET` returnerar en fast text. Reglerna som AI:n faktiskt använder läses
-ur `src/go/rules.md` i imagen. Detta är kvar från mailmaster-repot - se
-`specs/ai-mail-processor.md`.
+Regeleditorn i UI:t (`/mail/rules`) läser och sparar den riktiga regelfilen:
+`GET /api/v1/rules` returnerar innehållet i `-rules` (i klustret
+`/app/rules.md`), `PUT /api/v1/rules` sparar den. Innehållet valideras
+först - tomt innehåll eller markdown utan regelrubriker avvisas med 400 -
+och den sparade filen används av AI:n direkt, utan omstart.
+
+Begränsning: filen ligger i containerns filystem och överlever en
+container-omstart, men inte att poden skapas om. Då går den tillbaka till
+`src/go/rules.md` från imagen.

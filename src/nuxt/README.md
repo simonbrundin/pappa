@@ -240,11 +240,16 @@ cd src/nuxt && npm run kameo:sync      # -> environments/dev/kameo.env.enc
 cd src/nuxt && npm run kameo:decrypt   # -> environments/dev/kameo.env
 ```
 
-### Känd begränsning
+### Regler
 
-Regelendpointet är en stub - `PUT /api/v1/rules` kvitterar men sparar inte,
-och `GET` returnerar en fast text. Reglerna AI:n faktiskt använder läses ur
-`src/go/rules.md` i imagen. Detta är kvar från mailmaster-repot.
+`GET /api/v1/rules` läser regelfilen (`-rules`, i klustret `/app/rules.md`) och
+`PUT /api/v1/rules` sparar den. Sparningen valideras först - innehållet
+tolkas som markdown, och tomt innehåll eller text utan regelrubriker
+avvisas med 400. Den sparade filen används av AI:n direkt, utan omstart.
+
+Begränsning: filen ligger i containerns filsystem. Den överlever en
+container-omstart, men inte att poden skapas om - då går den tillbaka till
+`src/go/rules.md` från imagen.
 
 ## GDPR i gränssnittet
 
