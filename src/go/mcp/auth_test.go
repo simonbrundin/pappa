@@ -44,7 +44,7 @@ func testServer(t *testing.T) *Server {
 		},
 	}
 
-	return NewServer(cfg, nil, nil)
+	return NewServer(cfg, nil, nil, "", "")
 }
 
 func TestListAccountsReportsAuthMethodAndLoginState(t *testing.T) {
