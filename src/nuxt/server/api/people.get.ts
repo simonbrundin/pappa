@@ -40,7 +40,17 @@ export default defineEventHandler(async () => {
           where ps.person_id = p.id),
         '{}'::text[]
       ) as source_urls,
-      p.linkedin_slug
+      p.linkedin_slug,
+      coalesce(
+        (select array_agg(distinct cp.stage::text)
+           from candidate_pipeline cp where cp.person_id = p.id),
+        '{}'::text[]
+      ) as pipeline_stages,
+      coalesce(
+        (select array_agg(distinct cp.role_label)
+           from candidate_pipeline cp where cp.person_id = p.id),
+        '{}'::text[]
+      ) as pipeline_roles
     from person p
     left join organization o on o.id = p.organization_id
     order by o.name nulls last, p.full_name

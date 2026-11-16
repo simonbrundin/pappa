@@ -3,6 +3,20 @@ import type { CvEntry, Person } from '#shared/types/people'
 
 const props = defineProps<{ person: Person }>()
 
+const emit = defineEmits<{ 'add-to-pipeline': [person: Person] }>()
+
+/** Kort etikett för pipeline-stegen på personkortet. */
+const stageLabel: Record<string, string> = {
+  sourced: '🔍 Sökt',
+  teams_check: '🪪 Teams-koll',
+  review: '👍 Granskning',
+  contacted: '✉️ Kontaktad',
+  lunch: '🍽️ Lunch',
+  paper: '🥂 Kritat papper',
+  hired: '✅ Anställd',
+  dropped: '🚫 Bortfall',
+}
+
 const open = ref(false)
 
 const initials = computed(() =>
@@ -161,6 +175,20 @@ const employmentTypeLabel: Record<string, string> = {
       </li>
     </ul>
 
+    <!-- Pipeline: steg och roller personen är aktuell för. -->
+    <ul v-if="person.pipeline_stages?.length" class="flex flex-wrap gap-1.5">
+      <li
+        v-for="stage in person.pipeline_stages"
+        :key="stage"
+        class="chip border-brand-500/40 bg-brand-500/15 text-white"
+      >
+        {{ stageLabel[stage] ?? stage }}
+      </li>
+      <li v-for="role in person.pipeline_roles ?? []" :key="role" class="chip">
+        {{ role }}
+      </li>
+    </ul>
+
     <footer class="mt-auto flex flex-wrap items-center gap-2 pt-1">
       <a
         v-if="canContact"
@@ -188,6 +216,14 @@ const employmentTypeLabel: Record<string, string> = {
         @click="open = !open"
       >
         {{ open ? 'Dölj' : person.cv.length ? 'CV & källa' : 'Källa' }} ▾
+      </button>
+
+      <button
+        type="button"
+        class="rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-ink-300 transition hover:bg-brand-500/20 hover:text-white"
+        @click="emit('add-to-pipeline', person)"
+      >
+        🗂️ Pipeline
       </button>
     </footer>
 

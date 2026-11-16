@@ -1497,3 +1497,245 @@ comment on function fn_merge_people is 'Slår ihop två poster om samma person. 
 comment on table person_merge is 'Logg över sammanslagna dubbletter. Importer hoppar över external_id som finns här.';
 comment on function fn_match_candidates is 'Rankar kandidater mot en kravprofil. Returnerar viktad poäng 0-100, delpoäng per del, matchade/missade must-have och en förklaring per person.';
 comment on function fn_purge_expired_personal_data is 'Gallrar personer vars retention_until passerat. Kör via pg_cron eller manuellt.';
+
+-- ============================================================================
+-- Rekryteringspipeline (kanban)
+--
+-- Flödet som rekryteringsflödet faktiskt har:
+--   sourced -> teams_check -> review -> contacted -> lunch -> paper -> hired
+--   (dropped = bortfall, med orsak)
+--
+-- Designprinciper:
+--   1. EN rad per (person, roll). Samma person kan vara aktuell för flera
+--      roller; boarden grupperar per person, kolumnen är den fördelade stegen.
+--   2. Sourcing (sökväg) är ett attribut, inte ett stadium - "solla" är de
+--      filter som redan finns pa /kandidater.
+--   3. Varje stage-flytt loggas i pipeline_event, sa att flödet går att
+--      folja i efterhand (vem som tog beslutet, nar, varfor).
+--   4. Granskning (review) kravar TVa roster: en anstalld och en grundare.
+-- ============================================================================
+
+do $$ begin
+  create type pipeline_stage as enum
+    ('sourced','teams_check','review','contacted','lunch','paper','hired','dropped');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type pipeline_voter_role as enum ('employee','founder');
+exception when duplicate_object then null; end $$;
+
+do $$ begin
+  create type pipeline_source as enum
+    ('linkedin','arbetsforrmedlingen','boolag','myndighet',
+     'it_bolag_sundsvall','soulmate_kontakt','annat');
+exception when duplicate_object then null; end $$;
+
+comment on type pipeline_stage is
+  'Rekryteringssteg. sourced->teams_check->review->contacted->lunch->paper->hired, dropped = bortfall.';
+comment on type pipeline_source is
+  'Sokvag: var kandidaten hittades. linkedin|arbetsforrmedlingen|boolag|myndighet|it_bolag_sundsvall|soulmate_kontakt|annat.';
+
+-- ---------------------------------------------------------------------------
+-- Rorare - vem som kan tumma upp (anstald eller grundare)
+-- ---------------------------------------------------------------------------
+create table if not exists pipeline_voter (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null unique,
+  role       pipeline_voter_role not null default 'employee',
+  active     boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------------
+-- Pipeline-rad: en person i en roll
+-- ---------------------------------------------------------------------------
+create table if not exists candidate_pipeline (
+  id               uuid primary key default gen_random_uuid(),
+  person_id        uuid not null references person(id) on delete cascade,
+  role_label       text not null default 'Okand roll',
+  stage            pipeline_stage not null default 'sourced',
+  source           pipeline_source not null default 'annat',
+  source_note      text,
+  owner_id         uuid references pipeline_voter(id) on delete set null,
+  note             text,
+  drop_reason      text,
+  teams_ref        text,                 -- id pa Planner-kortet, om det finns
+  entered_stage_at timestamptz not null default now(),
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  constraint candidate_pipeline_unique unique (person_id, role_label)
+);
+create index if not exists pipeline_stage_idx  on candidate_pipeline (stage);
+create index if not exists pipeline_person_idx on candidate_pipeline (person_id);
+
+drop trigger if exists t_pipeline_touch on candidate_pipeline;
+create trigger t_pipeline_touch before update on candidate_pipeline
+  for each row execute function fn_touch_updated_at();
+
+-- ---------------------------------------------------------------------------
+-- Stage-historik - vem som tog beslutet, nar och varfor
+-- ---------------------------------------------------------------------------
+create table if not exists pipeline_event (
+  id         bigserial primary key,
+  pipeline_id uuid not null references candidate_pipeline(id) on delete cascade,
+  from_stage pipeline_stage,
+  to_stage   pipeline_stage not null,
+  actor      text,
+  note       text,
+  at         timestamptz not null default now()
+);
+create index if not exists pipeline_event_pipeline on pipeline_event (pipeline_id, at desc);
+
+-- ---------------------------------------------------------------------------
+-- Rost - en anstalld och en grundare per granskningskort
+-- ---------------------------------------------------------------------------
+create table if not exists pipeline_vote (
+  id          uuid primary key default gen_random_uuid(),
+  pipeline_id uuid not null references candidate_pipeline(id) on delete cascade,
+  voter_id    uuid not null references pipeline_voter(id) on delete cascade,
+  voter_role  pipeline_voter_role not null,
+  approved    boolean not null,
+  note        text,
+  at          timestamptz not null default now(),
+  constraint pipeline_vote_unique unique (pipeline_id, voter_role)
+);
+
+-- ---------------------------------------------------------------------------
+-- Planner-kort (Teams "Rekrytering"-listan)
+--
+-- Korten importeras fra CSV (manuell export ur Planner) tills Graph-behorighet
+-- finns i tenanten. Matchningen mot personregistret sker i fn_match_person.
+-- ---------------------------------------------------------------------------
+create table if not exists planner_card (
+  id            uuid primary key default gen_random_uuid(),
+  external_id   text not null unique,
+  title         text not null,
+  bucket        text,
+  description   text,
+  organization  text,                       -- organisation som stod i kortet
+  linkedin_slug text,
+  raw           jsonb not null default '{}'::jsonb,
+  person_id     uuid references person(id) on delete set null,
+  match_score   real,
+  match_kind    text,
+  imported_at   timestamptz not null default now()
+);
+create index if not exists planner_card_person on planner_card (person_id);
+
+-- Kolumnen lades till efter att tabellen skapades - 'create table if not
+-- exists' ändrar inte en tabell som redan finns.
+alter table planner_card add column if not exists organization text;
+
+-- ---------------------------------------------------------------------------
+-- Matchning: Planner-kort -> person i registret
+--
+-- 1. Exakt normaliserat namn -> score 1.0 (kind 'exact')
+-- 2. Annars fn_name_match: bada namndelar >= 0.75 -> score = medel
+-- 3. Organisationen ska stamma nar den anges - annars sanks score och
+--    kind blir 'name_only' (manniskans bedomning kvar).
+-- 4. Under 0.75 matchar inget - kortet visas som omatchat och lases hand.
+-- ---------------------------------------------------------------------------
+create or replace function fn_match_person(p_name text, p_org text default null)
+returns table (
+  person_id   uuid,
+  full_name   text,
+  organization text,
+  score       real,
+  kind        text
+)
+language sql
+stable
+as $$
+  with cands as (
+    select p.id,
+           p.full_name,
+           o.name as organization,
+           p.normalized_name,
+           coalesce(fn_normalize(o.name), '') as org_norm,
+           nm.given_score,
+           nm.family_score
+      from person p
+      left join organization o on o.id = p.organization_id
+      cross join lateral fn_name_match(p_name, p.full_name) nm
+     where p_name is not null and btrim(p_name) <> ''
+  ),
+  scored as (
+    select c.*,
+           case when c.normalized_name = fn_normalize(p_name)
+                then 1.0
+                else (c.given_score + c.family_score) / 2
+           end as name_score,
+           (p_org is not null and btrim(p_org) <> ''
+              and c.org_norm = fn_normalize(p_org)) as org_match
+      from cands c
+  )
+  select s.id,
+         s.full_name,
+         s.organization,
+         (case when s.org_match or s.name_score >= 1.0
+               then s.name_score
+               else s.name_score * 0.9 end)::real,
+         case when s.normalized_name = fn_normalize(p_name) then 'exact'
+              when s.org_match then 'name+org'
+              else 'name_only' end
+    from scored s
+   where s.name_score >= 0.75
+     and (
+       p_org is null or btrim(p_org) = '' or s.org_match
+       or s.name_score >= 0.9
+     )
+   order by (case when s.org_match then 0 else 1 end), s.name_score desc, s.full_name
+   limit 1;
+$$;
+
+-- ---------------------------------------------------------------------------
+-- Vyer for boarden
+-- ---------------------------------------------------------------------------
+create or replace view v_pipeline_board as
+select cp.id,
+       cp.person_id,
+       p.full_name,
+       o.name as organization,
+       p.title,
+       p.location,
+       p.email,
+       p.phone,
+       p.do_not_contact,
+       p.linkedin_slug,
+       cp.role_label,
+       cp.stage,
+       cp.source,
+       cp.source_note,
+       cp.note,
+       cp.drop_reason,
+       cp.teams_ref,
+       cp.owner_id,
+       ov.name as owner_name,
+       ov.role as owner_role,
+       cp.entered_stage_at,
+       cp.updated_at
+  from candidate_pipeline cp
+  join person p on p.id = cp.person_id
+  left join organization o on o.id = p.organization_id
+  left join pipeline_voter ov on ov.id = cp.owner_id;
+
+create or replace view v_pipeline_votes as
+select v.pipeline_id,
+       v.voter_role,
+       v.approved,
+       v.note,
+       v.at,
+       pv.name as voter_name,
+       pv.id as voter_id
+  from pipeline_vote v
+  join pipeline_voter pv on pv.id = v.voter_id;
+
+comment on table candidate_pipeline is
+  'En person i en roll. unique (person_id, role_label) - samma person kan ha flera roller.';
+comment on column candidate_pipeline.role_label is 'Fria rollnamn t.ex. "Backend-utvecklare". Ingen koppling till job_profile.';
+comment on column candidate_pipeline.source is 'Sokvag: var kandidaten hittades.';
+comment on column candidate_pipeline.drop_reason is 'Varfor kandidaten forsvann - fritext.';
+comment on table pipeline_event is 'Stage-historik. Loggar varje flytt med vem, nar och varfor.';
+comment on table pipeline_vote is 'Roster pa granskningskort. En anstalld och en grundare per kort.';
+comment on table planner_card is 'Kort fran Teams/Planner-listan "Rekrytering". Importeras via CSV tills Graph-behorighet finns.';
+comment on function fn_match_person is 'Matchar ett namn (och valfritt organisation) mot personregistret. Returnerar bast matchning over triskeln 0.75.';

@@ -21,6 +21,7 @@ const sections: NavSection[] = [
     title: 'Rekrytering',
     items: [
       { to: '/kandidater', label: 'Kandidater', icon: '👥' },
+      { to: '/pipeline', label: 'Pipeline', icon: '🗂️' },
       { to: '/uppdrag', label: 'Uppdrag', icon: '🎯' },
     ],
   },

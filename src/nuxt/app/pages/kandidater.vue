@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { PIPELINE_SOURCE_LABELS } from '#shared/types/pipeline'
+import type { PipelineSource } from '#shared/types/pipeline'
+import type { Person } from '#shared/types/people'
+
 const { data, status, error, refresh } = usePeople()
 
 const search = ref('')
@@ -15,6 +19,51 @@ const onlyDocumented = ref(false)
  */
 const route = useRoute()
 const showDuplicates = ref(route.query.duplicates === '1')
+
+// ---------------------------------------------------------------------------
+// Lägg i pipeline
+//
+// Sourcingen (sökvägar + "solla") sker här: filtren väljer ur kandidaterna,
+// och den som är relevant läggs in i pipen med roll och sökväg.
+// ---------------------------------------------------------------------------
+const { headers } = useAdminToken()
+const addTarget = ref<Person | null>(null)
+const addRole = ref('')
+const addSource = ref<PipelineSource>('annat')
+const addBusy = ref(false)
+const addMessage = ref<string | null>(null)
+
+function openAdd(person: Person) {
+  addTarget.value = person
+  addRole.value = ''
+  addSource.value = 'annat'
+  addMessage.value = null
+}
+
+async function submitAdd() {
+  if (!addTarget.value) return
+  addBusy.value = true
+  addMessage.value = null
+  try {
+    await $fetch('/api/pipeline', {
+      method: 'POST',
+      headers: headers(),
+      body: {
+        op: 'create',
+        person_id: addTarget.value.id,
+        role_label: addRole.value.trim() || 'Okänd roll',
+        source: addSource.value,
+      },
+    })
+    addTarget.value = null
+    await refresh()
+  } catch (err: unknown) {
+    const e = err as { data?: { message?: string }; statusMessage?: string }
+    addMessage.value = e.data?.message ?? e.statusMessage ?? 'Kunde inte lägga in i pipen.'
+  } finally {
+    addBusy.value = false
+  }
+}
 
 const people = computed(() => data.value?.people ?? [])
 
@@ -336,7 +385,71 @@ useHead({
     </div>
 
     <div v-else class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      <PersonCard v-for="person in filtered" :key="person.id" :person="person" />
+      <PersonCard
+        v-for="person in filtered"
+        :key="person.id"
+        :person="person"
+        @add-to-pipeline="openAdd"
+      />
+    </div>
+
+    <!-- Lägg i pipeline -->
+    <div
+      v-if="addTarget"
+      class="fixed inset-0 z-50 grid place-items-center bg-ink-950/80 p-4"
+      @click.self="addTarget = null"
+    >
+      <div class="card w-full max-w-md space-y-4 p-5">
+        <div>
+          <h2 class="text-lg font-semibold text-white">Lägg i pipeline</h2>
+          <p class="text-sm text-ink-400">
+            {{ addTarget.full_name }}
+            <span v-if="addTarget.organization"> · {{ addTarget.organization }}</span>
+          </p>
+        </div>
+
+        <label class="block space-y-1.5 text-sm">
+          <span class="text-ink-300">Roll</span>
+          <input
+            v-model="addRole"
+            type="text"
+            placeholder="T.ex. Backend-utvecklare"
+            class="w-full rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2.5 text-sm text-white placeholder:text-ink-400 focus:border-brand-500 focus:outline-none"
+          />
+        </label>
+
+        <label class="block space-y-1.5 text-sm">
+          <span class="text-ink-300">Sökväg</span>
+          <select
+            v-model="addSource"
+            class="w-full rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2.5 text-sm text-ink-100 focus:border-brand-500 focus:outline-none"
+          >
+            <option v-for="(label, value) in PIPELINE_SOURCE_LABELS" :key="value" :value="value">
+              {{ label }}
+            </option>
+          </select>
+        </label>
+
+        <p v-if="addMessage" class="text-sm text-rose-soft">{{ addMessage }}</p>
+
+        <div class="flex justify-end gap-2">
+          <button
+            type="button"
+            class="rounded-lg border border-white/10 px-3 py-2 text-sm text-ink-300 hover:text-white"
+            @click="addTarget = null"
+          >
+            Avbryt
+          </button>
+          <button
+            type="button"
+            class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 disabled:opacity-40"
+            :disabled="addBusy"
+            @click="submitAdd"
+          >
+            Lägg in
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -31,6 +31,10 @@ export interface Person {
   source_count: number
   source_urls: string[]
   linkedin_slug: string | null
+  /** Pipeline-steg personen är aktuell för (tom = inte i pipen). */
+  pipeline_stages: string[]
+  /** Roller personen är aktuell för i pipen. */
+  pipeline_roles: string[]
   /** Anställningshistorik: var, vad, hur länge. */
   cv: CvEntry[]
 }

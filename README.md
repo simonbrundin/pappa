@@ -117,6 +117,55 @@ profilens `weights` (jsonb) och justeras per uppdrag utan kodändring.
 Att spara en kravprofil kräver admin-token (`NUXT_ADMIN_TOKEN`) - samma token
 som dubblettsammanslagningen. Läsning och rankning kräver ingen token.
 
+## Pipelinen (kanban)
+
+Sidan **/pipeline** är rekryteringsflödet: en board över de kandidater som är
+aktiva just nu.
+
+| Kolumn | Steg | Går vidare när |
+|---|---|---|
+| 🔍 Sökt | `sourced` | Kandidaten är lagd in från `/kandidater` |
+| 🪪 Teams-koll | `teams_check` | Svar: finns inte i Planner-listan |
+| 👍 Granskning | `review` | Anställd **och** grundare har tumme upp |
+| ✉️ Kontaktad | `contacted` | Kandidaten har svarat |
+| 🍽️ Lunch | `lunch` | Lunchen är genomförd |
+| 🥂 Kritat papper | `paper` | Pappersgranskningen är klar |
+| ✅ Anställd | `hired` | - |
+| 🚫 Bortfall | `dropped` | Alltid med orsak |
+
+Boarden är per **person**, inte per uppdrag. En person kan ha flera roller -
+då visas en rad per person med en chip per roll, och kolumnen är den roll
+som kommit längst.
+
+**Sourcingen är inget stadium.** Sökvägen (LinkedIn, Arbetsförmedlingen,
+Boolag, myndigheter, IT-bolag i Sundsvall, Soulmate-kontakt) är ett fält på
+kortet, och "solla" (yrke, stad, teknikkompetens) är de filter som redan
+finns på `/kandidater`.
+
+Varje flytt loggas i `pipeline_event` (vem, när, varför). Röterna i
+granskningssteget ligger i `pipeline_vote` - en anställd och en grundare per
+kort, och först när båda är gröna går kortet vidare till "kontaktad".
+
+Rörare identifieras via en namnlista (`pipeline_voter`) - appen har ingen
+inloggning, så man väljer sitt namn i toppen av sidan. Skrivning kräver
+admin-token, precis som resten av databasen.
+
+### Teams/Planner-listan
+
+Knappar **"🪪 Planner-lista"** importerar er rekryteringslista från Planner
+(export till CSV) och matchar korten mot personregistret med
+`fn_match_person()`. Kort som inte matchar visas som omatchade och kan
+länkas manuellt - **automatiska felmatchningar är inte acceptabla**, det är
+personuppgifter.
+
+När kandidaten matchar sätts `teams_ref` på pipeline-kortet, så att boarden
+visar "🪪 I Planner" - den är redan rekryterad i teamets lista.
+
+Graph/Planner-automatik (`Tasks.Read.All` + admin consent i tenanten) är
+nästa steg; CSV-importen använder samma matchningsmotor, bara källan skiljer.
+
+Se `specs/candidate-pipeline.md` och `db/test_pipeline.sql`.
+
 ## Admin-token
 
 Skrivning mot masterdatabasen (dubblettsammanslagning, kravprofiler) kräver
@@ -160,7 +209,12 @@ arkivera). Klienten är en Go-tjänst med två ytor:
 |---|---|
 | `/mail` | Inkorgen - läsa mejl, analysera med AI, godkänna/avvisa åtgärder |
 | `/mail/rules` | Regeleditorn |
-| `/mail/kameo-utbetalningar` | Låneuppgifter från Kameo (kort- och långsiktig) |
+
+Utanför mailagentens sidor:
+
+| Sida | Innehåll |
+|---|---|
+| `/kameo-utbetalningar` | Låneuppgifter från Kameo (kort- och långsiktig), flikar för aktiva och återbetalade lån |
 
 ### Så pratar webbappen med klienten
 
