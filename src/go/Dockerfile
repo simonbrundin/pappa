@@ -42,4 +42,7 @@ ENV HOME=/root
 
 EXPOSE 8401 8402
 
-CMD ["/app/mailagent"]
+# ENTRYPOINT + CMD: deploymenten skickar in flaggor via `args`, vilket
+# ersätter CMD men läggs till ENTRYPOINT.
+ENTRYPOINT ["/app/mailagent"]
+CMD []
