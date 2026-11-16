@@ -44,12 +44,5 @@ const emit = defineEmits<{
     >
       {{ analyzing ? '🤖 Analyserar…' : '🤖 Processa mejl' }}
     </button>
-
-    <NuxtLink
-      to="/mail/rules"
-      class="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-ink-300 transition hover:border-brand-500/50 hover:text-white"
-    >
-      📝 Redigera regler
-    </NuxtLink>
   </section>
 </template>
