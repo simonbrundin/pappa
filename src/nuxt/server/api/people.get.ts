@@ -44,6 +44,9 @@ export default defineEventHandler(async () => {
         '{}'::text[]
       ) as source_urls,
       p.linkedin_slug,
+      p.is_potential,
+      p.not_relevant_reason,
+      p.potential_review_at,
       coalesce(
         (select array_agg(distinct cp.stage::text)
            from candidate_pipeline cp where cp.person_id = p.id),

@@ -122,6 +122,10 @@ create table if not exists person (
   contact_state       contact_state not null default 'lead',
   do_not_contact      boolean     not null default false,
   retention_until     date,                    -- GDPR: gallras detta datum
+  -- Rekrytering: är kandidaten med i de aktiva flödena (true) eller parkerad (false)?
+  is_potential        boolean not null default true,
+  not_relevant_reason text,                    -- varför kandidaten inte är aktuell
+  potential_review_at date,                    -- när kandidaten ska ses över igen
   notes               text,
   extra               jsonb       not null default '{}'::jsonb,
   created_at          timestamptz not null default now(),

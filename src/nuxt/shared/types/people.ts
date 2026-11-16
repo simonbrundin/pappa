@@ -31,6 +31,12 @@ export interface Person {
   source_count: number
   source_urls: string[]
   linkedin_slug: string | null
+  /** Indikerar om kandidaten är i den aktiva rekryteringspoolen. */
+  is_potential: boolean
+  /** Skäl till varför kandidaten inte är aktuell. */
+  not_relevant_reason: string | null
+  /** Datum för nästa genomgång. */
+  potential_review_at: string | null
   /** Pipeline-steg personen är aktuell för (tom = inte i pipen). */
   pipeline_stages: string[]
   /** Roller personen är aktuell för i pipen. */
