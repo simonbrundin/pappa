@@ -15,10 +15,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="controls">
+  <section class="card mb-5 flex flex-wrap items-center gap-3 p-4">
+    <label class="sr-only" for="folder-select">Mapp</label>
     <select
+      id="folder-select"
+      class="rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2 text-sm text-ink-100 transition focus:border-brand-500 focus:outline-none disabled:opacity-50"
       :value="folder"
-      class="folder-select"
       :disabled="disabled || folders.length === 0"
       @change="emit('update:folder', ($event.target as HTMLSelectElement).value)"
     >
@@ -26,89 +28,28 @@ const emit = defineEmits<{
     </select>
 
     <button
-      @click="emit('fetch')"
+      type="button"
+      class="rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-brand-500/20 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="loading || disabled"
-      class="btn btn-primary"
+      @click="emit('fetch')"
     >
-      {{ loading ? '⏳ Loading...' : '📥 Hämta mejl' }}
+      {{ loading ? '⏳ Laddar…' : '📥 Hämta mejl' }}
     </button>
 
     <button
-      @click="emit('analyze')"
+      type="button"
+      class="rounded-xl bg-gradient-to-br from-amber-soft to-amber-soft/70 px-4 py-2 text-sm font-semibold text-ink-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
       :disabled="analyzing || disabled"
-      class="btn btn-orange"
+      @click="emit('analyze')"
     >
-      {{ analyzing ? '🤖 Analyserar...' : '🤖 Processa mejl' }}
+      {{ analyzing ? '🤖 Analyserar…' : '🤖 Processa mejl' }}
     </button>
 
-    <NuxtLink to="/mail/rules" class="btn btn-secondary">
+    <NuxtLink
+      to="/mail/rules"
+      class="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-ink-300 transition hover:border-brand-500/50 hover:text-white"
+    >
       📝 Redigera regler
     </NuxtLink>
-  </div>
+  </section>
 </template>
-
-<style scoped>
-.controls {
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  margin-bottom: 2rem;
-}
-
-.folder-select {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.folder-select:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.btn {
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  border: none;
-  color: #fff;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.2s, opacity 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-.btn-orange {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-}
-
-.btn-orange:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-.btn-secondary {
-  background: #1a1a1a;
-  border: 1px solid #333;
-}
-
-.btn-secondary:hover {
-  border-color: #667eea;
-  transform: translateY(-2px);
-}
-</style>

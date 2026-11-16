@@ -8,17 +8,26 @@ const {
 } = useMailEmailProcessing()
 
 const { current, folders, folder, needsLogin, selectFolder } = useMailAccounts()
+
+useHead({ title: 'Pappa – Mail' })
 </script>
 
 <template>
-  <div class="container mail-root">
-    <header>
-      <h1><span class="emoji">📬</span> MailMaster</h1>
-      <p class="subtitle">Account: {{ current?.name ?? '—' }}</p>
-      <nav class="nav-links">
-        <NuxtLink to="/mail/kameo-utbetalningar">💸 Kameo utbetalningar</NuxtLink>
-        <NuxtLink to="/">⬅ Till kandidaterna</NuxtLink>
-      </nav>
+  <div class="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+    <header class="mb-8">
+      <div class="flex flex-wrap items-center gap-3">
+        <span
+          class="grid size-10 place-items-center rounded-xl bg-gradient-to-br from-brand-500 to-mint-400 text-lg shadow-lg shadow-brand-500/25"
+        >
+          📬
+        </span>
+        <div>
+          <h1 class="text-2xl font-semibold tracking-tight text-white sm:text-3xl">MailMaster</h1>
+          <p class="text-sm text-ink-400">
+            Konto: {{ current?.name ?? '—' }}
+          </p>
+        </div>
+      </div>
     </header>
 
     <AccountSelector />
@@ -34,7 +43,10 @@ const { current, folders, folder, needsLogin, selectFolder } = useMailAccounts()
       @analyze="analyzeEmails"
     />
 
-    <div v-if="error" class="error">
+    <div
+      v-if="error"
+      class="card mb-5 border-rose-soft/30 p-4 text-sm text-rose-soft"
+    >
       ❌ {{ error }}
     </div>
 
@@ -48,92 +60,9 @@ const { current, folders, folder, needsLogin, selectFolder } = useMailAccounts()
       @decide="decideEmail"
     />
 
-    <div v-else-if="!loading && !error" class="empty">
-      <p>No emails loaded yet</p>
-      <p class="hint">Click the button above to fetch emails</p>
+    <div v-else-if="!loading && !error" class="card p-12 text-center">
+      <p class="text-lg font-semibold text-white">Inga mejl hämtade</p>
+      <p class="mt-1 text-sm text-ink-300">Klicka på knappen ovan för att hämta mejl.</p>
     </div>
   </div>
 </template>
-
-<style scoped>
-/*
- * Stilen är scoped - som global CSS nollställde den här reseten
- * Tailwind-marginaler och -paddingar i resten av appen.
- * Den egna resetten begränsas till mailvyn via :deep, så att den även
- * gäller inne i komponenterna (AccountSelector, EmailList, EmailControls).
- */
-.mail-root :deep(*) {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.emoji {
-  background: none;
-  -webkit-background-clip: unset;
-  -webkit-text-fill-color: initial !important;
-  background-clip: unset;
-  color: #fff;
-}
-
-.subtitle {
-  color: #888;
-  font-size: 0.9rem;
-}
-
-.nav-links {
-  margin-top: 0.75rem;
-}
-
-.nav-links a {
-  color: #b9a7ff;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-
-.nav-links a:hover {
-  text-decoration: underline;
-}
-
-.error {
-  background: rgba(239, 68, 68, 0.1);
-  border: 1px solid #ef4444;
-  border-radius: 8px;
-  padding: 1rem;
-  text-align: center;
-  color: #ef4444;
-  margin-bottom: 1rem;
-}
-
-.empty {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #666;
-}
-
-.hint {
-  margin-top: 0.5rem;
-  font-size: 0.85rem;
-  color: #444;
-}
-</style>

@@ -31,12 +31,18 @@ async function onSelect(event: Event) {
 </script>
 
 <template>
-  <div class="account-bar">
-    <div class="account-row">
-      <label class="account-label" for="account-select">Konto</label>
+  <section class="card mb-5 p-4">
+    <div class="flex flex-wrap items-center gap-3">
+      <label
+        class="text-xs font-semibold uppercase tracking-wider text-ink-400"
+        for="account-select"
+      >
+        Konto
+      </label>
+
       <select
         id="account-select"
-        class="account-select"
+        class="rounded-xl border border-white/10 bg-ink-950/60 px-3 py-2 text-sm text-ink-100 transition focus:border-brand-500 focus:outline-none disabled:opacity-50"
         :value="currentAccount"
         :disabled="loadingAccounts || accounts.length === 0"
         @change="onSelect"
@@ -46,144 +52,50 @@ async function onSelect(event: Event) {
         </option>
       </select>
 
-      <span v-if="current" class="account-meta">
+      <span v-if="current" class="chip">
         {{ current.username }}
-        <span class="dot">·</span>
+        <span class="text-ink-400">·</span>
         {{ current.server }}
       </span>
 
-      <button
-        v-if="needsLogin"
-        class="btn btn-login"
-        :disabled="loginState === 'waiting'"
-        @click="startLogin"
-      >
-        {{ loginState === 'waiting' ? '⏳ Väntar på inloggning...' : '🔑 Logga in' }}
-      </button>
-      <span v-else-if="current?.logged_in" class="badge-ok">✓ Inloggad</span>
+      <div class="ml-auto flex items-center gap-2">
+        <span v-if="current?.logged_in" class="chip border-mint-400/30 bg-mint-400/10 text-mint-400">
+          ✓ Inloggad
+        </span>
+        <button
+          v-if="needsLogin"
+          type="button"
+          class="rounded-xl bg-gradient-to-br from-amber-soft to-amber-soft/70 px-4 py-2 text-sm font-semibold text-ink-950 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+          :disabled="loginState === 'waiting'"
+          @click="startLogin"
+        >
+          {{ loginState === 'waiting' ? '⏳ Väntar på inloggning…' : '🔑 Logga in' }}
+        </button>
+      </div>
     </div>
 
-    <div v-if="loginChallenge && loginState === 'waiting'" class="challenge">
-      <p class="challenge-text">
-        Öppna <a :href="loginChallenge.verification_uri" target="_blank" rel="noopener">
+    <div
+      v-if="loginChallenge && loginState === 'waiting'"
+      class="mt-4 rounded-xl border border-brand-500/30 bg-brand-500/10 p-4 text-center"
+    >
+      <p class="text-sm text-ink-300">
+        Öppna
+        <a
+          :href="loginChallenge.verification_uri"
+          target="_blank"
+          rel="noopener"
+          class="text-brand-400 underline decoration-dotted hover:text-white"
+        >
           {{ loginChallenge.verification_uri }}
-        </a> och mata in koden:
+        </a>
+        och mata in koden:
       </p>
-      <code class="challenge-code">{{ loginChallenge.user_code }}</code>
+      <code class="mt-3 inline-block rounded-lg border border-white/10 bg-ink-950 px-4 py-2 text-xl tracking-[0.3em] text-white">
+        {{ loginChallenge.user_code }}
+      </code>
     </div>
 
-    <p v-if="loginMessage" class="login-message">{{ loginMessage }}</p>
-    <p v-if="accountError" class="login-message error">{{ accountError }}</p>
-  </div>
+    <p v-if="loginMessage" class="mt-3 text-sm text-amber-soft">{{ loginMessage }}</p>
+    <p v-if="accountError" class="mt-3 text-sm text-rose-soft">{{ accountError }}</p>
+  </section>
 </template>
-
-<style scoped>
-.account-bar {
-  margin-bottom: 1.5rem;
-}
-
-.account-row {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.account-label {
-  color: #888;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.account-select {
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  border: 1px solid #333;
-  background: #1a1a1a;
-  color: #fff;
-  font-size: 1rem;
-  cursor: pointer;
-}
-
-.account-select:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.account-meta {
-  color: #666;
-  font-size: 0.85rem;
-}
-
-.dot {
-  margin: 0 0.25rem;
-}
-
-.badge-ok {
-  color: #4ade80;
-  font-size: 0.85rem;
-}
-
-.btn-login {
-  padding: 0.6rem 1.1rem;
-  border-radius: 8px;
-  border: none;
-  background: linear-gradient(135deg, #f97316, #ea580c);
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-login:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-.btn-login:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.challenge {
-  margin-top: 1rem;
-  text-align: center;
-  background: rgba(102, 126, 234, 0.1);
-  border: 1px solid #667eea;
-  border-radius: 8px;
-  padding: 1rem;
-}
-
-.challenge-text {
-  color: #ccc;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.challenge-text a {
-  color: #b9a7ff;
-}
-
-.challenge-code {
-  display: inline-block;
-  font-size: 1.4rem;
-  letter-spacing: 0.15em;
-  background: #0f0f0f;
-  border: 1px solid #333;
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  color: #fff;
-}
-
-.login-message {
-  margin-top: 0.75rem;
-  text-align: center;
-  color: #f97316;
-  font-size: 0.9rem;
-}
-
-.login-message.error {
-  color: #ef4444;
-}
-</style>
