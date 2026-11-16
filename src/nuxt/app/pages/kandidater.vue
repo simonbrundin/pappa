@@ -140,7 +140,7 @@ const categoryLabels: Record<string, string> = {
 }
 
 useHead({
-  title: 'Pappa – IT-rekrytering i Sundsvall',
+  title: 'Pappa – Kandidater',
   meta: [{ name: 'description', content: 'Alla kandidater ur masterdatabasen.' }],
 })
 </script>
